@@ -1,0 +1,40 @@
+/*Instruktionen Margin*/
+
+  .instructions {
+    margin-left : 150px;
+    margin-right : 150px;
+}
+
+/* Antwortmöglichkeiten */
+
+
+/*Instruktionen RT Aufgabe*/
+
+.instruction-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.circle-container {
+  display: flex;               /* Flexbox für horizontale Anordnung */
+  justify-content: space-evenly; /* Verteilung der Elemente mit gleichmäßigen Abständen */
+  width: 100%;                  /* Volle Breite */
+  margin-bottom: 5px;
+}
+
+.circle-item {
+  display: flex;               /* Flexbox innerhalb der circle-item */
+  flex-direction: column;      /* Vertikale Anordnung von Bild und Text */
+  align-items: center;         /* Zentrieren der Inhalte */
+  justify-content: center;     /* Vertikale Zentrierung */
+  text-align: center;
+  width: 200px;                /* Geben Sie der circle-item eine feste Breite */
+}
+
+.jspsych-html-button-response-button {
+  font-size: 18px;
+  margin-top: 10px;
+}
+
