@@ -1,5 +1,6 @@
 Vorgenommene Änderungen:
-12.12.24:
+
+12.12.24:    
     Extinctions-Phase:
     - Die Fragestellung wurde umformuliert.
     - Die Sympathiebewertung befindet sich nun auf derselben Seite wie das Bild.
