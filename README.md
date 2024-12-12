@@ -19,6 +19,8 @@ Vorgenommene Änderungen:
     während der Extinction-Phase um jeweils 1% pro beantwortetem Bild.
     
     Code:
-    - Ein Feld zum Eingeben des Codes wurde hinzugefügt. Ich war mir leider nicht sicher, an welcher Stelle du dieses haben möchtest, daher befindet es sich derzeit auf der Seite, auf der der Code erstellt wird. Hier sollten jedoch die Formulierungen der Instruktionen wahrscheinlich noch angepasst werden (bzw. ein Hinweis
+    - Ein Feld zum Eingeben des Codes wurde hinzugefügt. Ich war mir leider nicht sicher,
+    an welcher Stelle du dieses haben möchtest, daher befindet es sich derzeit auf der Seite, 
+    auf der der Code erstellt wird. Hier sollten jedoch die Formulierungen der Instruktionen wahrscheinlich noch angepasst werden (bzw. ein Hinweis
     eingefügt, dass dieser Code nicht den Daten zuordenbar ist).
 
