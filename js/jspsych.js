@@ -2792,7 +2792,7 @@ var jsPsychModule = (function (exports) {
 	      },
 	      use_webaudio: true,
 	      show_progress_bar: false,
-	      message_progress_bar: "Fortschritt",
+	      message_progress_bar: "Completion Progress",
 	      auto_update_progress_bar: true,
 	      default_iti: 0,
 	      minimum_valid_rt: 0,

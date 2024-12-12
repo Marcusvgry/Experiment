@@ -8,11 +8,11 @@ Welches Bild?
 // -- Initialisierung jsPsych und timeline----------------------------------------------------------------------------
 var timeline = [];
 const jsPsych = initJsPsych({
+     //Progress Bar anzeigen und manuell steuern
     message_progress_bar: "Fortschritt",
     show_progress_bar: true,
+    auto_update_progress_bar: false,
     on_finish: function () {
-
-        
 
         // Zusätzliche Daten
         var csv = jsPsych.data.get().csv();
@@ -32,6 +32,9 @@ const jsPsych = initJsPsych({
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 console.error("AJAX error: ", textStatus, errorThrown);
+            },
+            on_start: function(trial) {
+                document.getElementById('face-image').src = jsPsych.timelineVariable('face', true);
             }
         });
         */
@@ -202,14 +205,14 @@ for (let i in faces_nahost_arabisch_old) {
     timeline_extinction.push({
         face: faces_nahost_arabisch_old[i],
         berstr: berstr_nahoestlich_arabisch[i]
-    });
+    },);
 }
 
 for (let i in faces_weisz_europaeisch_old) {
     timeline_extinction.push({
         face: faces_weisz_europaeisch_old[i],
         berstr: berstr_weisz_europaeisch[i]
-    });
+    },);
 }
 
 // Test-Timeline füllen
@@ -217,21 +220,21 @@ for (let i in faces_nahost_arabisch_old) {
     timeline_test.push({
         face: faces_nahost_arabisch_old[i],
         berstr: berstr_nahoestlich_arabisch[i]
-    });
+    },);
 }
 
 for (let i in faces_weisz_europaeisch_old) {
     timeline_test.push({
         face: faces_weisz_europaeisch_old[i],
         berstr: berstr_weisz_europaeisch[i]
-    });
+    },);
 }
 
 for (let i in faces_new_all) {
     timeline_test.push({
         face: faces_new_all[i],
         berstr: "kein BeStr"
-    });
+    },);
 }
 
 
@@ -261,8 +264,16 @@ const instructions = {
         0,75 Versuchspersonenstunden zu erhalten. <br> <br>
         Bitte wählen Sie für die Durchführung einen ruhigen Ort, an dem Sie nicht gestört werden,
         und führen Sie die Studie auf einem Laptop durch. </div>`,
+    ],
+    show_clickable_nav: true,
+    button_label_next: "Weiter",
+    allow_backward: false,
+}
 
-        `<div class="instructions"><h3> <b>Teilnahmevoraussetzungen</b> </h3>  
+var codeErstellen = {
+    type: jsPsychSurveyHtmlForm,
+    preamble:
+      `<div class="instructions"><h3> <b>Teilnahmevoraussetzungen</b> </h3>  
         Um an der Studie teilzunehmen, bitten wir Sie, einen vierstelligen Code zu erstellen,
         basierend auf den nachfolgend gestellten Fragen. Dieser Code dient der Anonymisierung Ihrer 
         Daten. <br> <br>
@@ -273,14 +284,16 @@ const instructions = {
         1. Wie lautet die erste Ziffer Ihres Geburtsdatums ? <br>
             2. Wie lautet der erste Buchstabe des Vornamens Ihrer Mutter ? <br>
             3. Wie lautet der dritte Buchstabe Ihres Geburtsorts ? <br>
-            4. Wie viele Buchstaben hat der Vorname Ihres Vaters ?<br> 
+            4. Wie viele Buchstaben hat der Vorname Ihres Vaters ?
         </div>`
-    ],
-    show_clickable_nav: true,
-    button_label_next: "Weiter",
-    allow_backward: false,
-
+    ,   
+    html: `
+    <div class="instructions">
+    <p> Code: <input name="code" type="text" required="true"/>
+    </div>`,
 }
+
+
 
 var einverstaendniserklaerung = {
     type: jsPsychSurveyHtmlForm,
@@ -298,6 +311,9 @@ var einverstaendniserklaerung = {
      <input type="checkbox" id="consent-checkbox" required>
          <br> <br>
          </div>`,
+    on_finish: function(){
+            jsPsych.progressBar.progress = 0.01; 
+        }
 
 }
 
@@ -340,7 +356,10 @@ var instruktionenVerstanden = {
     html: `<i> Ich habe die Instruktionen der Studie verstanden. <i>.
      <input type="checkbox" id="consent-checkboxInstructions" required>
          <br> <br>
-         `
+         `,
+    on_finish: function(){
+            jsPsych.progressBar.progress += 0.01; 
+        }
 }
 
 var instructions1_2 = {
@@ -357,6 +376,9 @@ var instructions1_2 = {
     show_clickable_nav: true,
     button_label_next: "Untersuchung beginnen",
     allow_backward: false,
+    on_finish: function(){
+        jsPsych.progressBar.progress += 0.01; 
+    }
 
 }
 
@@ -369,28 +391,30 @@ var preload2 = {
 const extinction_phase = {
     timeline: [
         {
-            type: jsPsychHtmlKeyboardResponse,
-            stimulus: function () {
+            type: jsPsychHtmlSliderResponse,
+            stimulus: function() {
                 const html = `
-                    <img src="${jsPsych.timelineVariable('face', true)}">
-                    <p>${jsPsych.timelineVariable('berstr', true)}</p>`;
+            <img src="${jsPsych.evaluateTimelineVariable('face', true)}">
+            <p style="font-size: 20px; margin-top: -10px">${jsPsych.evaluateTimelineVariable('berstr', true)}</p>
+            <p style="font-size: 16px; margin-bottom: 5px">Diese Person ist mir sympathisch</p>`;
                 return html;
             },
-            choices: "NO_KEYS",
-            trial_duration: 1000,
-
-        },
-        {
-            type: jsPsychHtmlSliderResponse,
-            stimulus: `<p style="font-size: 30px; margin-bottom: 60px">Diese Person ist sympathisch</p>`,
-            labels: ['<div style="font-size: 24px;">1</div>', '<div style="font-size: 24px;">2</div>', '<div style="font-size: 24px;">3</div>', 
-                     '<div style="font-size: 24px;">4</div>', '<div style="font-size: 24px;">5</div>', '<div style="font-size: 24px;">6</div>', 
-                     '<div style="font-size: 24px;">7</div>'],
+            labels: ['<div style="font-size: 10px;"> stimme überhaupt nicht zu</div>',
+                 '<div style="font-size: 10px;">stimme gar nicht zu</div>', 
+                 '<div style="font-size: 10px;">stimme nicht zu</div>', 
+                 '<div style="font-size: 10px;">neutral</div>', 
+                 '<div style="font-size: 10px;">stimme zu</div>', 
+                 '<div style="font-size: 10px;">stimme stark zu</div>', 
+                 '<div style="font-size: 10px;">stimme absolut zu</div>'],
             min: 1,
             max: 7,
             slider_start: 4,
             slider_width: 800,
             require_movement: true,
+            on_finish: function(){
+                console.log("Trial beendet");
+                jsPsych.progressBar.progress += 0.01; 
+            }
         }
     ],
     timeline_variables: timeline_extinction,
@@ -509,8 +533,8 @@ const test_phase = {
         {
             type: jsPsychImageButtonResponse,
             stimulus: jsPsych.timelineVariable('face'),
-            choices: ['Neu', 'Ja, ich habe etwas über deren Straftat erfahren', 'Ja, ich habe etwas über deren Beruf erfahren.'],
             prompt: '<p>Haben Sie diese Person im ersten Durchgang gesehen?</p>',
+            choices: ['Nein', 'Ja, ich habe etwas über deren Straftat erfahren', 'Ja, ich habe etwas über deren Beruf erfahren.'],
             on_finish: function (data) {
                 var isBerOrStr = jsPsych.timelineVariable('berstr', true);
                 var currentface = jsPsych.timelineVariable('face', true);
@@ -1260,6 +1284,7 @@ var debrief = {
 
 timeline.push(preload);
 timeline.push(instructions);
+timeline.push(codeErstellen);
 timeline.push(einverstaendniserklaerung);
 timeline.push(instructions_1);
 timeline.push(instruktionenVerstanden);

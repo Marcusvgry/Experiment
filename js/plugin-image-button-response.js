@@ -211,10 +211,10 @@ var jsPsychImageButtonResponse = (function (jspsych) {
           after_response(choiceIndex);
         });
       }
-      display_element.appendChild(buttonGroupElement);
       if (trial.prompt !== null) {
-        display_element.insertAdjacentHTML("beforeend", trial.prompt);
+        stimulusElement.insertAdjacentHTML("afterend", trial.prompt);
       }
+      display_element.appendChild(buttonGroupElement);
       var start_time = performance.now();
       var response = {
         rt: null,
