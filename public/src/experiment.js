@@ -8,10 +8,13 @@ Welches Bild?
 // -- Initialisierung jsPsych und timeline----------------------------------------------------------------------------
 var timeline = [];
 const jsPsych = initJsPsych({
+    message_progress_bar: "Fortschritt",
+    show_progress_bar: true,
     on_finish: function () {
 
-        // Zusätzliche Daten
+        
 
+        // Zusätzliche Daten
         var csv = jsPsych.data.get().csv();
 
         // 
@@ -294,7 +297,8 @@ var einverstaendniserklaerung = {
     html: ` <div class="instructions"> <i> Ich erkläre mich mit der Erhebung und Verarbeitung meiner personenbezogenen Daten einverstanden <i>.
      <input type="checkbox" id="consent-checkbox" required>
          <br> <br>
-         </div>`
+         </div>`,
+
 }
 
 const instructions_1 = {
