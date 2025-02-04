@@ -1355,7 +1355,7 @@ const mail_trial = {
       ]
     }
   };
-/*
+
 timeline.push(preload);
 timeline.push(instructions);
 timeline.push(codeErstellen);
@@ -1371,7 +1371,6 @@ timeline.push(instructions_3);
 timeline.push(preload3);
 timeline.push(test_phase);
 timeline.push(IAT_trial);
-*/
 timeline.push(survey_trial);
 timeline.push(debrief);
 timeline.push(mail_trial);
