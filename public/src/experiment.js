@@ -128,7 +128,7 @@ for (let i = 12; i < 24; i++) {
 };
 
 var faces_nahost_arabisch = [
-    "../img/7-resized.jpg", "../img/8-resized.jpg", "../img/14-resized.jpg", "../img/16-resized.jpg",
+    "../img/7-resized.jpg", "../img/8-resized.jpg", "../img/14-resized.jpg", "../img/44resize.jpg",
     "../img/21-resized.jpg", "../img/28-resized.jpg", "../img/36-resized.jpg", "../img/51-resized.jpg",
     "../img/59-resized.jpg", "../img/67-resized.jpg", "../img/75-resized.jpg", "../img/82-resized.jpg",
     "../img/90-resized.jpg", "../img/107-resized.jpg", "../img/114-resized.jpg", "../img/121-resized.jpg",
@@ -515,7 +515,7 @@ var instructions_3 = {
         durchmischt und einzeln nacheinander präsentiert. </p>
         <p> Nach jedem Bild werden Sie gebeten anzugeben, ob Sie das Gesicht bereits zuvor gesehen 
         haben und falls ja, aus welchem Kontext. Sollten Sie sich unsicher sein, wählen Sie bitte die 
-        Antwort, die am ehesten zutrifft </p>.
+        Antwort, die am ehesten zutrifft. </p>
 </div>`
     ],
     button_label_next: "Aufgabe starten",
@@ -1190,8 +1190,10 @@ Ihre Angaben werden anonym erfasst und sind nicht auf Ihre Person zurückführba
             },
             {
               type: 'radiogroup',
-              title: "Bitte geben Sie an, ob Sie sich selbst einem der in dieser Studie dargestellten ethnischen Erscheinungsbilder zuordnen würden:",
-              choices: ['Ja, ich würde mich selbst einem weißem ethnischen Erscheinungsbild zuordnen.', 'Ja, ich würde mich selbst einem nahöstlichen ethnischen Erscheinungsbild zuordnen.', 'Nein, ich würde mich keinem der beiden Erscheinungsbilder zuordnen.'],
+              title: "Bitte geben Sie an, ob Sie sich selbst in einem der in dieser Studie dargestellten ethnischen Erscheinungsbilder gelesen fühlen.",
+              choices: ['Ja, ich werde als Person mit einem weiß-europäischen Erscheinungsbild gelesen.', 
+                'Ja, ich werde als Person mit einem nahöstlichen Erscheinungsbild gelesen.',
+                 'Nein, ich werde in keinem der beiden Erscheinungsbilder gelesen.'],
               colCount: 1,
               name: 'Ethnie',
               isRequired: true,
@@ -1202,86 +1204,158 @@ Ihre Angaben werden anonym erfasst und sind nicht auf Ihre Person zurückführba
     }
   };
   
-var debrief = {
+  var debrief = {
     type: jsPsychInstructions,
     pages: [
-        `<div class="instructions">
+      `<div class="instructions" style="max-width: 650px; margin: 0 auto; line-height:1.6;">
         <p>Vielen Dank für Ihre Teilnahme an unserer Studie!</p>
-
+  
         <p>
-            Diese Studie untersucht, wie bestimmte kontextuelle Informationen zusammen mit dem 
-            äußeren Erscheinungsbild das Wiedererkennen von Gesichtern beeinflussen. Die 
-            ausgewählten Berufsgruppen und Straftaten in der Studie werden dabei als stereotypisch oder 
-            nicht stereotypisch für unterschiedliche Personengruppen wahrgenommen, denen eine 
-            bestimmte ethnische Zugehörigkeit zugewiesen wird.
+          Diese Studie untersucht, wie bestimmte kontextuelle Informationen zusammen 
+          mit dem äußeren Erscheinungsbild das Wiedererkennen von Gesichtern beeinflussen. 
+          Die ausgewählten Berufsgruppen und Straftaten in der Studie werden dabei als 
+          stereotypisch oder nicht stereotypisch für unterschiedliche Personengruppen 
+          wahrgenommen, denen eine bestimmte ethnische Zugehörigkeit zugewiesen wird.
         </p>
         
         <p>
-            Die Stereotypen wurden durch eine vorangegangene Pilotstudie ermittelt, bei der Personen 
-            angeben sollten, was im Durchschnitt eine weiße Person in Deutschland als stereotypisch für 
-            Personen mit einem bestimmten äußeren Erscheinungsbild betrachtet. Die Paarungen 
-            zwischen Bildern, Berufsgruppen und Straftaten spiegeln somit nur diese Annahmen wider
-            und <b>stellen keine tatsächlichen Zusammenhänge</b> dar.
+          Die Stereotypen wurden durch eine vorangegangene Pilotstudie ermittelt, bei 
+          der Personen angeben sollten, was im Durchschnitt eine weiße Person in Deutschland 
+          als stereotypisch für Personen mit einem bestimmten äußeren Erscheinungsbild 
+          betrachtet. Die Paarungen zwischen Bildern, Berufsgruppen und Straftaten 
+          spiegeln somit nur diese Annahmen wider und <b>stellen keine tatsächlichen 
+          Zusammenhänge</b> dar.
         </p>
         
         <p>
-            Bitte beachten Sie jedoch, dass die verwendeten Stereotype rassistische Vorurteile und 
-            Narrative widerspiegeln können, die in dieser Studie untersucht werden.
+          Bitte beachten Sie jedoch, dass die verwendeten Stereotype rassistische 
+          Vorurteile und Narrative widerspiegeln können, die in dieser Studie untersucht 
+          werden.
         </p>
         
         <p>
-            Die Erforschung solcher Stereotype ist von Bedeutung, da sie das Gedächtnis von Zeug*innen 
-            beeinflussen können, was in polizeilichen Ermittlungen zu falschen Aussagen und potenziell 
-            zu Fehlurteilen führen kann, besonders für People of Colour.
+          Die Erforschung solcher Stereotype ist von Bedeutung, da sie das Gedächtnis 
+          von Zeug*innen beeinflussen können, was in polizeilichen Ermittlungen 
+          zu falschen Aussagen und potenziell zu Fehlurteilen führen kann, 
+          besonders für People of Colour.
         </p>
         
         <p>
-            Unser Ziel ist es daher zu untersuchen, wie diese Stereotype das Gedächtnis von Zeug*innen 
-            beeinflussen und somit Falschaussagen besser vorbeugen und reduzieren zu können.
-            Ihre Teilnahme ist daher ein wichtiger Beitrag zu dieser Forschung. Wir danken Ihnen 
-            herzlich für Ihre Unterstützung.
+          Unser Ziel ist es daher zu untersuchen, wie diese Stereotype das Gedächtnis 
+          von Zeug*innen beeinflussen und somit Falschaussagen besser vorbeugen und 
+          reduzieren zu können. Ihre Teilnahme ist daher ein wichtiger Beitrag 
+          zu dieser Forschung. Wir danken Ihnen herzlich für Ihre Unterstützung.
         </p>
-        
+  
+        <p><strong>Falls Sie Anmerkungen zur Studie haben, können Sie diese gerne im folgenden Feld angeben:</strong></p>
         <p>
-            Falls Sie Psychologie an der Universität Heidelberg studieren, senden Sie bitte den zu Beginn 
-            erstellten Code an die untenstehende E-Mail-Adresse, um Ihre VPN-Stunden zu erhalten.
+          <textarea id="feedbackBox" 
+                    style="
+                      width: 95%; 
+                      height: 120px; 
+                      font-size: 1em; 
+                      padding: 10px; 
+                      border: 2px solid #999; 
+                      border-radius: 5px;
+                      resize: vertical;"
+                    placeholder="Ihre Anmerkungen ...">
+          </textarea>
         </p>
-        
+  
         <p>
-            Für Rückfragen stehen wir Ihnen gerne zur Verfügung unter 
-            <a href="mailto:luca.bieling@stud.uni-heidelberg.de">luca.bieling@stud.uni-heidelberg.de</a>.
+          Auf der folgenden Seite können Sie auswählen, ob Sie an der Verlosung 
+          der Online-Gutscheine teilnehmen oder als Psychologiestudierende*r 
+          der Universität Heidelberg 0,75 Versuchspersonenstunden erhalten möchten. 
+          Für Rückfragen stehen wir Ihnen gerne zur Verfügung unter 
+          <a href="mailto:luca.bieling@stud.uni-heidelberg.de">luca.bieling@stud.uni-heidelberg.de</a>.
         </p>
-           </div> `
+  
+  
+      </div>`
     ],
     show_clickable_nav: true,
-    button_label_next: "Experiment beenden",
+    button_label_next: "Weiter",
     allow_backward: false,
-    on_start: function () {
+  
+    // Hier werden deine IAT-Werte ausgelesen und in den Daten gespeichert
+    /*
+    on_start: function() {
+      let bad_Arabic_Muslims = jsPsych.data.get()
+        .filter({ iat_type: 'bad-Arabic Muslims' })
+        .filterCustom(x => x.rt < 10000);
+      let mean_bad_Arabic = bad_Arabic_Muslims.count() > 0 
+        ? bad_Arabic_Muslims.filter({ correct: true }).select('rt').mean() 
+        : 0;
+  
+      let bad_White_European = jsPsych.data.get()
+        .filter({ iat_type: 'bad-White European' })
+        .filterCustom(x => x.rt < 10000);
+      let mean_bad_White = bad_White_European.count() > 0 
+        ? bad_White_European.filter({ correct: true }).select('rt').mean() 
+        : 0;
+  
+      let combinedData = bad_Arabic_Muslims
+        .join(bad_White_European)
+        .filter({ correct: true });
+      let sd = combinedData.count() > 0 
+        ? combinedData.select('rt').sd() 
+        : 1;
+  
+      let d = sd > 0 
+        ? (mean_bad_White - mean_bad_Arabic) / sd 
+        : 0;
+  
+      // Speichern der IAT-Auswertung in den jsPsych-Daten
+      jsPsych.data.addProperties({
+        mean_correct_responses_bad_Arabic_Muslims: mean_bad_Arabic,
+        mean_correct_responses_bad_White_European: mean_bad_White,
+        sd: sd,
+        d: d,
+      });
+      console.log("IAT-Daten berechnet, d = ", d);
+    },
+    */
+  
 
-        let bad_Arabic_Muslims = jsPsych.data.get().filter({ iat_type: 'bad-Arabic Muslims' }).filterCustom(function (x) { return x.rt < 10000 });
-        let mean_correct_responses_bad_Arabic_Muslims = bad_Arabic_Muslims.count() > 0 ? bad_Arabic_Muslims.filter({ correct: true }).select('rt').mean() : 0;
+  };
+  
 
-        let bad_White_European = jsPsych.data.get().filter({ iat_type: 'bad-White European' }).filterCustom(function (x) { return x.rt < 10000 });
-        let mean_correct_responses_bad_White_European = bad_White_European.count() > 0 ? bad_White_European.filter({ correct: true }).select('rt').mean() : 0;
-
-        let combinedData = bad_Arabic_Muslims.join(bad_White_European).filter({ correct: true });
-        let sd = combinedData.count() > 0 ? combinedData.select('rt').sd() : 1;
-
-        let d = sd > 0 ? (mean_correct_responses_bad_White_European - mean_correct_responses_bad_Arabic_Muslims) / sd : 0;
-
-        // Speichern der Werte in den jsPsych-Daten
-        jsPsych.data.addProperties({
-            mean_correct_responses_bad_Arabic_Muslims: mean_correct_responses_bad_Arabic_Muslims,
-            mean_correct_responses_bad_White_European: mean_correct_responses_bad_White_European,
-            sd: sd,
-            d: d,
-        })
-        var n = 2;
-        var data = jsPsych.data.get().last(n);
-        console.log(data);
+const mail_trial = {
+    type: jsPsychSurvey,
+    survey_json: {
+      showQuestionNumbers: false,
+      title: 'Verlosung und VPN-Stunden', // Haupttitel
+      completeText: 'Experiment beenden',
+      pageNextText: 'Continue',
+      pagePrevText: 'Previous',
+      pages: [
+        {
+          name: 'page1',
+          title:  `Im Folgenden können Sie auswählen, ob Sie an der Verlosung der Online-Gutscheine im Wert von 30 € teilnehmen oder als Psychologiestudierende*r der Universität Heidelberg 0,75 Versuchspersonenstunden erhalten möchten. Ihre angegebene E-MailAdresse wird getrennt von den in der Studie erhobenen Daten gespeichert und kann nicht mit diesen in Verbindung gebracht werden.`, // Zusätzlicher Titel für die Seite
+          description:'',
+          elements: [
+            {
+                type: "text",
+                name: "mail",
+                inputType: "email",
+                id: "Verlosung",
+                placeholder: "E-Mail-Adresse",
+                title: "Ja, ich möchte an der Verlosung der Online-Gutscheine im Wert von 30 € teilnehmen.",
+            },
+            {
+                type: "text",
+                name: "mail",
+                inputType: "email",
+                id: "VPN",
+                placeholder: "E-Mail-Adresse",
+                title: "Ja, ich bin Psychologiestudierende*r der Universität Heidelberg und möchte 0,75 Versuchspersonenstunden erhalten."
+            },
+          ]
+        }
+      ]
     }
-};
-
+  };
+/*
 timeline.push(preload);
 timeline.push(instructions);
 timeline.push(codeErstellen);
@@ -1297,5 +1371,7 @@ timeline.push(instructions_3);
 timeline.push(preload3);
 timeline.push(test_phase);
 timeline.push(IAT_trial);
+*/
 timeline.push(survey_trial);
 timeline.push(debrief);
+timeline.push(mail_trial);
