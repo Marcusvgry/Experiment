@@ -1,14 +1,21 @@
-/*
-Welches Bild?
-1 bis 7 oder Texte?
+let currentStep = 0;
+const TOTAL_STEPS = 740;
 
+// Hilfsfunktion zum Erhöhen des Fortschritts
+function incrementProgress() {
+  if (currentStep < TOTAL_STEPS) {
+    currentStep++;
+    jsPsych.progressBar.progress = currentStep / TOTAL_STEPS;
+  }
+  
+}
 
-*/
 
 // -- Initialisierung jsPsych und timeline----------------------------------------------------------------------------
 var timeline = [];
 const jsPsych = initJsPsych({
      //Progress Bar anzeigen und manuell steuern
+    
     message_progress_bar: "Fortschritt",
     show_progress_bar: true,
     auto_update_progress_bar: false,
@@ -268,6 +275,11 @@ const instructions = {
     show_clickable_nav: true,
     button_label_next: "Weiter",
     allow_backward: false,
+    on_finish: function() {
+        for (let i = 0; i < 4; i++) {
+            incrementProgress();
+        }
+      }
 }
 
 var codeErstellen = {
@@ -291,6 +303,11 @@ var codeErstellen = {
     <div class="instructions">
     <p> Code: <input name="code" type="text" required="true"/>
     </div>`,
+    on_finish: function(){
+        for (let i = 0; i < 4; i++) {
+            incrementProgress();
+        }
+      }
 }
 
 
@@ -311,9 +328,11 @@ var einverstaendniserklaerung = {
      <input type="checkbox" id="consent-checkbox" required>
          <br> <br>
          </div>`,
-    on_finish: function(){
-            jsPsych.progressBar.progress = 0.01; 
-        }
+         on_finish: function(){
+            for (let i = 0; i < 4; i++) {
+                incrementProgress();
+            }
+          }
 
 }
 
@@ -338,6 +357,11 @@ const instructions_1 = {
     show_clickable_nav: true,
     button_label_next: "Zur Beispielaufgabe",
     allow_backward: false,
+    on_finish: function() {
+        for (let i = 0; i < 4; i++) {
+            incrementProgress();
+        }
+      }
 
 }
 
@@ -357,10 +381,12 @@ var instruktionenVerstanden = {
      <input type="checkbox" id="consent-checkboxInstructions" required>
          <br> <br>
          `,
-    on_finish: function(){
-            jsPsych.progressBar.progress += 0.01; 
+         on_finish: function(){
+            for (let i = 0; i < 4; i++) {
+                incrementProgress();
+            }
+          }
         }
-}
 
 var instructions1_2 = {
     type: jsPsychInstructions,
@@ -376,9 +402,11 @@ var instructions1_2 = {
     show_clickable_nav: true,
     button_label_next: "Untersuchung beginnen",
     allow_backward: false,
-    on_finish: function(){
-        jsPsych.progressBar.progress += 0.01; 
-    }
+    on_finish: function() {
+        for (let i = 0; i < 4; i++) {
+            incrementProgress();
+        }
+      }
 
 }
 
@@ -410,11 +438,12 @@ const extinction_phase = {
             max: 7,
             slider_start: 4,
             slider_width: 800,
-            require_movement: true,
+            require_movement: false,
             on_finish: function(){
-                console.log("Trial beendet");
-                jsPsych.progressBar.progress += 0.01; 
-            }
+                for (let i = 0; i < 4; i++) {
+                    incrementProgress();
+                }
+              }
         }
     ],
     timeline_variables: timeline_extinction,
@@ -449,6 +478,11 @@ zu bearbeiten: </p>
     button_label_next: "Aufgabe starten",
     show_clickable_nav: true,
     allow_backward: false,
+    on_finish: function() {
+        for (let i = 0; i < 4; i++) {
+            incrementProgress();
+        }
+      }
 };
 
 
@@ -476,16 +510,18 @@ var fixation = {
 
 };
 
+var incrementRT = 0;
 // Kreis
 var test = {
     type: jsPsychImageKeyboardResponse,
     stimulus: jsPsych.timelineVariable('stimulus'),
-    choices: ['f', 'j']
+    choices: ['f', 'j'],
 };
 
 
 // Durchführen des Trials für 3 Minuten
-
+var ProgressRTTask = 0;
+var RestProgressRTTask = 0;
 var startTime = null;
 var test_procedure = {
     timeline: [fixation, test],
@@ -497,10 +533,18 @@ var test_procedure = {
         }
         var currentTime = new Date().getTime();
         var elapsedTime = (currentTime - startTime);
-        if (elapsedTime >= 5000) { // Zeit in Millisekunden die der Trial geht (Verzögerung beachten, 17600!)
+        if (elapsedTime >= 10000) { // Zeit in Millisekunden die der Trial geht (Verzögerung beachten, 176000!)
             return false;
         }
         return true;
+    },
+    on_finish: function(){
+        if (ProgressRTTask % 3 === 0 && ProgressRTTask < 150) {
+            incrementProgress();
+            RestProgressRTTask++;
+
+        }
+        ProgressRTTask++;
     }
 };
 
@@ -520,7 +564,18 @@ var instructions_3 = {
     ],
     button_label_next: "Aufgabe starten",
     show_clickable_nav: true,
-    allow_backward: false
+    allow_backward: false,
+    on_start: function(trial) {
+        var restProgress = (50 - RestProgressRTTask);
+        for (let i = 0; i < restProgress; i++) {
+            incrementProgress();
+        }
+    },
+    on_finish: function() {
+        for (let i = 0; i < 4; i++) {
+            incrementProgress();
+        }
+      }
 };
 
 var preload3 = {
@@ -536,6 +591,9 @@ const test_phase = {
             prompt: '<p>Haben Sie diese Person im ersten Durchgang gesehen?</p>',
             choices: ['Nein', 'Ja, ich habe etwas über deren Straftat erfahren', 'Ja, ich habe etwas über deren Beruf erfahren.'],
             on_finish: function (data) {
+                for (let i = 0; i < 4; i++) {
+                    incrementProgress();
+                }
                 var isBerOrStr = jsPsych.timelineVariable('berstr', true);
                 var currentface = jsPsych.timelineVariable('face', true);
                 var response = data.response;
@@ -608,7 +666,8 @@ const test_phase = {
         },
     ],
     timeline_variables: timeline_test,
-    randomize_order: true
+    randomize_order: true,
+   
 };
 
 // IAT 
@@ -620,6 +679,11 @@ var instructions_iat = {
     show_clickable_nav: true,
     button_label_next: "Weiter",
     allow_backward: false,
+    on_finish: function() {
+        for (let i = 0; i < 4; i++) {
+            incrementProgress();
+        }
+      }
 
 };
 
@@ -640,7 +704,12 @@ var category_block = {
     ],
     show_clickable_nav: true,
     button_label_next: "Weiter",
-    allow_backward: false
+    allow_backward: false,
+    on_finish: function() {
+        for (let i = 0; i < 2; i++) {
+            incrementProgress();
+        }
+      }
 };
 
 var instructions_block = {
@@ -653,7 +722,13 @@ var instructions_block = {
         "make a mistake, a red X will appear. Press the keys listed below " +
         "to continue. Go as fast as you can while being accurate.<br><br> " +
         "Press Enter when you are ready to start.</div>",
-    choices: ['Enter']
+    choices: ['Enter'],
+    on_finish: function(){
+        // +1
+        for (let i = 0; i < 4; i++) {
+            incrementProgress();
+        }
+      }
 };
 
 var trial_block = {
@@ -698,7 +773,11 @@ var trial_block = {
         { stimulus: "Marcelo", stim_key_association: "right" },
     ],
     randomize_order: true,
-    repetitions: 2
+    repetitions: 2,
+    on_finish: function(){
+        // +1
+        incrementProgress();
+      } 
 };
 
 var instructions_block2 = {
@@ -712,7 +791,13 @@ var instructions_block2 = {
         "make a mistake, a red X will appear. Press the keys listed below " +
         "to continue. Go as fast as you can while being accurate.<br><br> " +
         "Press Enter when you are ready to start.</div>",
-    choices: ['Enter']
+    choices: ['Enter'],
+    on_finish: function(){
+        // +1
+        for (let i = 0; i < 4; i++) {
+            incrementProgress();
+        }
+      }
 };
 
 var trial_block2 = {
@@ -753,7 +838,11 @@ var trial_block2 = {
         { stimulus: "Joyous", stim_key_association: "right" }
     ],
     randomize_order: true,
-    repetitions: 2
+    repetitions: 2,
+    on_finish: function(){
+        // +1
+        incrementProgress();
+      } 
 };
 
 var instructions_block3 = {
@@ -767,7 +856,13 @@ var instructions_block3 = {
         "make a mistake, a red X will appear. Press the keys listed below " +
         "to continue. Go as fast as you can while being accurate.<br><br> " +
         "Press Enter when you are ready to start.</div>",
-    choices: ['Enter']
+    choices: ['Enter'],
+    on_finish: function(){
+        // +1
+        for (let i = 0; i < 4; i++) {
+            incrementProgress();
+        }
+      }
 };
 
 var trial_block3 = {
@@ -828,7 +923,11 @@ var trial_block3 = {
         { type: jsPsychIatHtml, stimulus: "Joyous", stim_key_association: "right" }
     ],
     randomize_order: true,
-    repetitions: 1
+    repetitions: 1,
+    on_finish: function(){
+        // +1
+        incrementProgress();
+      }
 };
 
 var instructions_block4 = {
@@ -842,7 +941,13 @@ var instructions_block4 = {
         "make a mistake, a red X will appear. Press the keys listed below " +
         "to continue. Go as fast as you can while being accurate.<br><br> " +
         "Press Enter when you are ready to start.</div>",
-    choices: ['Enter']
+    choices: ['Enter'],
+    on_finish: function(){
+        // +1
+        for (let i = 0; i < 4; i++) {
+            incrementProgress();
+        }
+      }
 };
 
 var trial_block4 = {
@@ -903,7 +1008,11 @@ var trial_block4 = {
         { type: jsPsychIatHtml, stimulus: "Joyous", stim_key_association: "right" }
     ],
     randomize_order: true,
-    repetitions: 2
+    repetitions: 2,
+    on_finish: function(){
+        // +1
+        incrementProgress();
+      }
 };
 
 var instructions_block5 = {
@@ -915,7 +1024,13 @@ var instructions_block5 = {
         "If you make a mistake, a red X will appear. Press the keys listed below " +
         "to continue. Go as fast as you can while being accurate.<br><br> " +
         "Press Enter when you are ready to start.</div>",
-    choices: ['Enter']
+    choices: ['Enter'],
+    on_finish: function(){
+        // +1
+        for (let i = 0; i < 4; i++) {
+            incrementProgress();
+        }
+      }
 };
 
 var trial_block5 = {
@@ -960,7 +1075,11 @@ var trial_block5 = {
         { type: jsPsychIatHtml, stimulus: "Marcelo", stim_key_association: "left" },
     ],
     randomize_order: true,
-    repetitions: 2
+    repetitions: 2,
+    on_finish: function(){
+        // +1
+        incrementProgress();
+      }
 };
 
 var instructions_block6 = {
@@ -973,7 +1092,13 @@ var instructions_block6 = {
         "If you make a mistake, a red X will appear. Press the keys listed below " +
         "to continue. Go as fast as you can while being accurate.<br><br> " +
         "Press Enter when you are ready to start.</div>",
-    choices: ['Enter']
+    choices: ['Enter'],
+    on_finish: function(){
+        // +1
+        for (let i = 0; i < 4; i++) {
+            incrementProgress();
+        }
+      }
 };
 
 var trial_block6 = {
@@ -1038,7 +1163,11 @@ var trial_block6 = {
         { type: jsPsychIatHtml, stimulus: "Joyous", stim_key_association: "right" }
     ],
     randomize_order: true,
-    repetitions: 1
+    repetitions: 1,
+    on_finish: function(){
+        // +1
+        incrementProgress();
+      }
 };
 
 var instructions_block7 = {
@@ -1053,7 +1182,13 @@ var instructions_block7 = {
         "If you make a mistake, a red X will appear. Press the keys listed below " +
         "to continue. Go as fast as you can while being accurate.<br><br> " +
         "Press Enter when you are ready to start.</div>",
-    choices: ['Enter']
+    choices: ['Enter'],
+    on_finish: function(){
+        // +1
+        for (let i = 0; i < 4; i++) {
+            incrementProgress();
+        }
+      }
 };
 
 var trial_block7 = {
@@ -1114,7 +1249,11 @@ var trial_block7 = {
         { type: jsPsychIatHtml, stimulus: "Joyous", stim_key_association: "right" }
     ],
     randomize_order: true,
-    repetitions: 2
+    repetitions: 2,
+    on_finish: function(){
+        // +1
+        incrementProgress();
+      }
 };
 
 
@@ -1200,8 +1339,16 @@ Ihre Angaben werden anonym erfasst und sind nicht auf Ihre Person zurückführba
             },
           ]
         }
+
       ]
-    }
+
+    },
+    on_finish: function(){
+        for (let i = 0; i < 6; i++) {
+            incrementProgress();
+        }
+      }
+
   };
   
   var debrief = {
@@ -1250,16 +1397,16 @@ Ihre Angaben werden anonym erfasst und sind nicht auf Ihre Person zurückführba
         <p><strong>Falls Sie Anmerkungen zur Studie haben, können Sie diese gerne im folgenden Feld angeben:</strong></p>
         <p>
           <textarea id="feedbackBox" 
-                    style="
-                      width: 95%; 
-                      height: 120px; 
-                      font-size: 1em; 
-                      padding: 10px; 
-                      border: 2px solid #999; 
-                      border-radius: 5px;
-                      resize: vertical;"
-                    placeholder="Ihre Anmerkungen ...">
-          </textarea>
+          style="
+            width: 95%; 
+            height: 120px; 
+            font-size: 1em; 
+            padding: 10px; 
+            border: 2px solid #999; 
+            border-radius: 5px;
+            resize: vertical;"
+></textarea>
+
         </p>
   
         <p>
@@ -1278,7 +1425,6 @@ Ihre Angaben werden anonym erfasst und sind nicht auf Ihre Person zurückführba
     allow_backward: false,
   
     // Hier werden deine IAT-Werte ausgelesen und in den Daten gespeichert
-    /*
     on_start: function() {
       let bad_Arabic_Muslims = jsPsych.data.get()
         .filter({ iat_type: 'bad-Arabic Muslims' })
@@ -1314,7 +1460,11 @@ Ihre Angaben werden anonym erfasst und sind nicht auf Ihre Person zurückführba
       });
       console.log("IAT-Daten berechnet, d = ", d);
     },
-    */
+    on_finish: function() {
+        for (let i = 0; i < 4; i++) {
+            incrementProgress();
+        }
+      }
   
 
   };
@@ -1353,7 +1503,12 @@ const mail_trial = {
           ]
         }
       ]
-    }
+    },
+    on_finish: function(){
+        while (currentStep < TOTAL_STEPS) {
+            incrementProgress();
+          }
+      }
   };
 
 timeline.push(preload);
