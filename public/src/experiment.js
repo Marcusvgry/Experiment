@@ -438,9 +438,9 @@ const extinction_phase = {
             max: 7,
             slider_start: 4,
             slider_width: 800,
-            require_movement: false,
+            require_movement: true,
             on_finish: function(){
-                for (let i = 0; i < 4; i++) {
+                for (let i = 0; i < 4; i++) s{
                     incrementProgress();
                 }
               }
@@ -1475,7 +1475,7 @@ const mail_trial = {
     survey_json: {
       showQuestionNumbers: false,
       title: 'Verlosung und VPN-Stunden', // Haupttitel
-      completeText: 'Experiment beenden',
+      completeText: 'Weiter',
       pageNextText: 'Continue',
       pagePrevText: 'Previous',
       pages: [
