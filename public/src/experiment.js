@@ -440,7 +440,7 @@ const extinction_phase = {
             slider_width: 800,
             require_movement: true,
             on_finish: function(){
-                for (let i = 0; i < 4; i++) s{
+                for (let i = 0; i < 4; i++) {
                     incrementProgress();
                 }
               }
