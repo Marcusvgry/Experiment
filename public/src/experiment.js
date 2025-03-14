@@ -85,8 +85,6 @@ function startExperiment() {
 }
 // -- Variablen---------------------------------------------------------------------------------------------------------
 
-// Gruppenzugehörigkeit , Gruppe 1: nach Testphase, Gruppe 2: vor Extinktionsphase
-const group = Math.floor(Math.random() * 2) + 1;
 
 // Variablen Daten Antworten
 var co_ans_be_corr_be_we = 0;
@@ -110,6 +108,7 @@ var fa_ans_str_corr_neu_na = 0;
 var fa_ans_be_corr_neu_we = 0;
 var fa_ans_str_corr_neu_we = 0;
 
+var Teilnahme_Pilotstudie = 'Nein';
 
 // -- Arrays ---------------------------------------------------------------------------------------------------------
 // Arrays Gesichter + Randomisierung
@@ -201,6 +200,15 @@ var Straftaten_weisz_europaeisch = [
 ];
 
 var berstr_weisz_europaeisch = Berufe_weisz_europaeisch.concat(Straftaten_weisz_europaeisch);
+
+// Codes Pilotstudie
+const codes = [
+    "5HC4", "0WR7", "5NI4", "1EU6", "1mna", "1AI6", "1DI8", "1IN7", "0SD3",
+    "2HN7", "0BR6", "5IS7", "9UR3", "2HE5", "3AU7", "3AT7", "1CE5", "0UN5",
+    "3AU5", "1IL5", "2UT3", "2TI7", "1AC8", "1PI7", "8BC4", "2AN3", "1JH7",
+    "1JN5", "1KM8", "5JR6", "1GR7", "1EC8", "2ND4", "2NG5", "0ND6", "3PC5",
+    "0AE5", "1SE6", "2AN6", "1KO9", "1FM8", "1ST4"
+];
 
 // Initialisierung und Zuweisung Memory und Recogniton Timeline Variables
 var timeline_extinction = [];
@@ -303,11 +311,22 @@ var codeErstellen = {
     <div class="instructions">
     <p> Code: <input name="code" type="text" required="true"/>
     </div>`,
-    on_finish: function(){
+    on_finish: function(data){
+        var eingabe = data.response.code.toUpperCase(); 
+
+        if (codes.includes(eingabe)) {
+            Teilnahme_Pilotstudie = 'Ja';
+        }
+
+        //Füge Variable Teilnahme_Pilotstudie zu jsPsych.data hinzu
+        jsPsych.data.addProperties({
+            Teilnahme_Pilotstudie: Teilnahme_Pilotstudie
+        });
+
         for (let i = 0; i < 4; i++) {
             incrementProgress();
         }
-      }
+    }
 }
 
 
@@ -371,7 +390,7 @@ var instruktionenVerstanden = {
     <h3> <b> Beispielaufgabe </b> </h3>  
         Im Folgenden wird Ihnen ein Beispiel für das Frageformat gezeigt. <br> <br> 
         Bitte bewerten Sie zu dem dargebotenen Bild die folgende Aussage: <br> <br> 
-        <img src="../img/14-resized.jpg"> <br> <br>
+        <img src="../img/foto_beispielaufgabe.jpg"> <br> <br>
         „Diese Person ist sympathisch." <br> <br>
         Die möglichen Antwortmöglichkeiten sind: <br> 1 = stimme überhaupt nicht zu <br>  2 = stimme gar 
         nicht zu 3 <br>  = stimme nicht zu <br>  4 = neutral <br>  5 = stimme zu <br>  6 = stimme stark zu <br> 7 = stimme 
@@ -671,10 +690,18 @@ const test_phase = {
 };
 
 // IAT 
+// Block: Einführung & Kategorien
 var instructions_iat = {
     type: jsPsychInstructions,
     pages: [
-        'Platzhalter Text Instruktionen 1'
+        `<div class="instructions">
+        IAT<br><br>
+        Platzhalter Text Instruktionen IAT 1<br><br>
+        Im Folgenden bitten wir Sie, verschiedene Begriffe den passenden Kategorien zuzuordnen.<br><br>
+        Versuchen Sie bitte so schnell und genau wie möglich zu entscheiden, welcher Begriff zu welcher Kategorie gehört. Ihre Auswahl treffen Sie durch das Drücken der Computertasten <b>E</b> und <b>I</b>.<br><br>
+        Vor jedem Durchgang erhalten Sie eine kurze Anleitung, welche Taste für welche Kategorie steht. Bitte lesen Sie diese Instruktionen sorgfältig durch. In einigen Durchgängen sind die Tasten jeweils mit zwei Kategorien verknüpft. Anschließend werden Ihnen die Begriffe nacheinander angezeigt.<br><br>
+        Auf der nächsten Seite lernen Sie zunächst die Begriffe und Kategorien kennen.
+        </div>`
     ],
     show_clickable_nav: true,
     button_label_next: "Weiter",
@@ -683,24 +710,25 @@ var instructions_iat = {
         for (let i = 0; i < 4; i++) {
             incrementProgress();
         }
-      }
-
+    }
 };
 
 var category_block = {
     type: jsPsychInstructions,
     pages: [
-        '<p>Next, you will use the "e" and "i" computer keys ' + 'to categorize items into groups as fast as you can. ' +
-        'These are the four groups and the items that belong to each:<br><br>' +
-        '<strong>Good</strong>:<br>' + 'Triumph, Friendship, Cheerful, Laughing, ' +
-        ' Delight, Happy, Joyous, Friend<br><br>' + '<strong>Bad</strong>:<br>' + 'Pain, ' +
-        '	Hurtful, Hatred, Horrible, Dirty, Ugly, Failure, Angry <br><br>' +
-        '<strong>Arabic Muslims</strong>:<br>' + " Hakim, " +
-        " Sharif, " + " Youssef, " + " Wahib, " + " Akbar, " +
-        " Muhsin, " + " Salim, " + " Karim, " + " Habib, " +
-        " Ashraf <br><br> " + '<strong>White European</strong>:<br>' + " Ernesto, " + " Matthias, " + " Maarten, " +
-        " Phillipe, " + " Guillame, " + " Benoit, " + " Takuya, " + " Kazuki, "
-        + " Chaiyo, " + " Marcelo <br><br>"
+        `<div class="instructions">
+        Instruktionen Tastatur/Kategorien:<br><br>
+        Als Nächstes werden Sie die Computertasten E und I verwenden, um die Begriffe so schnell wie möglich den entsprechenden Kategorien zuzuordnen.<br><br>
+        Dies sind die vier Kategorien und die dazugehörigen Begriffe:<br><br>
+        <strong>Gut:</strong><br>
+        Triumph, Freundschaft, Fröhlich, Lachen, Freude, Glücklich, Freudig, Freund<br><br>
+        <strong>Schlecht:</strong><br>
+        Schmerz, Verletzend, Hass, Schrecklich, Schmutzig, Hässlich, Misserfolg, Wütend<br><br>
+        <strong>Arabisch-muslimische Namen:</strong><br>
+        Hakim, Sharif, Youssef, Wahib, Akbar, Muhsin, Salim, Karim, Habib, Ashraf<br><br>
+        <strong>Weiße europäische Namen:</strong><br>
+        Ernesto, Matthias, Maarten, Phillipe, Guillaume, Benoît, Takuya, Kazuki, Chaiyo, Marcelo
+        </div>`
     ],
     show_clickable_nav: true,
     button_label_next: "Weiter",
@@ -709,26 +737,26 @@ var category_block = {
         for (let i = 0; i < 2; i++) {
             incrementProgress();
         }
-      }
+    }
 };
 
+// Block 1: Instruktion Block 1 & zugehöriger Trial-Block
 var instructions_block = {
     type: jsPsychHtmlKeyboardResponse,
-    stimulus: "<div style='position: absolute; top: 18%; left: 20%'><p>Press e for:<br><strong>Arabic Muslims</strong></p></div>" +
-        "<div style='position: absolute; top: 18%; right: 20%'><p>Press i for:<br><strong>White European</strong></p></div>" +
-        "<div style='position: relative; top: 42%; margin-left: auto; margin-right: auto'>Put a left finger on the <strong>e</strong> key for items that belong to the Arabic Muslims People category. Put a right finger on the " +
-        "<strong>i</strong> key for items that belong to the White European People " +
-        "category. Items will appear one at a time.<br><br>" + "If you " +
-        "make a mistake, a red X will appear. Press the keys listed below " +
-        "to continue. Go as fast as you can while being accurate.<br><br> " +
-        "Press Enter when you are ready to start.</div>",
+    stimulus: `<div class="instructions">
+    Instruktion Block 1<br><br>
+    Legen Sie einen Finger der linken Hand auf die E-Taste für Begriffe, die zur Kategorie <strong>Arabisch-muslimische Namen</strong> gehören.<br><br>
+    Legen Sie einen Finger der rechten Hand auf die I-Taste für Begriffe, die zur Kategorie <strong>Weiße europäische Namen</strong> gehören.<br><br>
+    Die Begriffe erscheinen nacheinander.<br><br>
+    Falls Sie einen Fehler machen, wird ein rotes X angezeigt. Drücken Sie die unten angegebene Taste, um fortzufahren. Versuchen Sie, so schnell wie möglich zu sein, während Sie genau bleiben.<br><br>
+    Drücken Sie Enter, wenn Sie bereit sind zu starten.
+    </div>`,
     choices: ['Enter'],
-    on_finish: function(){
-        // +1
+    on_finish: function() {
         for (let i = 0; i < 4; i++) {
             incrementProgress();
         }
-      }
+    }
 };
 
 var trial_block = {
@@ -738,14 +766,14 @@ var trial_block = {
             stimulus: jsPsych.timelineVariable('stimulus'),
             stim_key_association: jsPsych.timelineVariable('stim_key_association'),
             html_when_wrong: '<span style="color: red; font-size: 80px">X</span>',
-            bottom_instructions: '<p>If you press the wrong key, a red X will appear. Press the other key to continue</p>',
+            bottom_instructions: '<p>Falls Sie einen Fehler machen, erscheint ein rotes X. Drücken Sie die andere Taste, um fortzufahren.</p>',
             force_correct_key_press: true,
             display_feedback: true,
-            trial_duration: 3000, //Only if display_feedback is false
+            trial_duration: 3000,
             left_category_key: 'e',
             right_category_key: 'i',
-            left_category_label: ['Arabic Muslims'],
-            right_category_label: ['White European'],
+            left_category_label: ['Arabisch-muslimische Namen'],
+            right_category_label: ['Weiße europäische Namen'],
             response_ends_trial: true,
             data: { iat_type: 'practice' }
         }
@@ -753,7 +781,7 @@ var trial_block = {
     timeline_variables: [
         { stimulus: "Hakim", stim_key_association: "left" },
         { stimulus: "Sharif", stim_key_association: "left" },
-        { stimulus: "Yousef", stim_key_association: "left" },
+        { stimulus: "Youssef", stim_key_association: "left" },
         { stimulus: "Wahib", stim_key_association: "left" },
         { stimulus: "Akbar", stim_key_association: "left" },
         { stimulus: "Muhsin", stim_key_association: "left" },
@@ -764,40 +792,38 @@ var trial_block = {
         { stimulus: "Ernesto", stim_key_association: "right" },
         { stimulus: "Matthias", stim_key_association: "right" },
         { stimulus: "Maarten", stim_key_association: "right" },
-        { stimulus: "Philippe", stim_key_association: "right" },
-        { stimulus: "Guillame", stim_key_association: "right" },
-        { stimulus: "Benoit", stim_key_association: "right" },
+        { stimulus: "Phillipe", stim_key_association: "right" },
+        { stimulus: "Guillaume", stim_key_association: "right" },
+        { stimulus: "Benoît", stim_key_association: "right" },
         { stimulus: "Takuya", stim_key_association: "right" },
         { stimulus: "Kazuki", stim_key_association: "right" },
         { stimulus: "Chaiyo", stim_key_association: "right" },
-        { stimulus: "Marcelo", stim_key_association: "right" },
+        { stimulus: "Marcelo", stim_key_association: "right" }
     ],
     randomize_order: true,
     repetitions: 2,
     on_finish: function(){
-        // +1
         incrementProgress();
-      } 
+    } 
 };
 
+// Block 2: Instruktion Block 2 & zugehöriger Trial-Block
 var instructions_block2 = {
     type: jsPsychHtmlKeyboardResponse,
-    stimulus: "<div style='position: absolute; top: 18%; left: 20%'>Press E for:<br><strong>BAD</strong></div>" +
-        "<div style='position: absolute; top: 18%; right: 20%'>Press I for:<br><strong>GOOD</strong></div>" +
-        "<div style='position: relative; top: 42%; margin-left: auto; margin-right: auto'>Put a left finger on the <strong>e</strong> key for items that " +
-        "belong to the Bad category. Put a right finger on the " +
-        "<strong>i</strong> key for items that belong to the Good " +
-        "category. Items will appear one at a time.<br><br>" + "If you " +
-        "make a mistake, a red X will appear. Press the keys listed below " +
-        "to continue. Go as fast as you can while being accurate.<br><br> " +
-        "Press Enter when you are ready to start.</div>",
+    stimulus: `<div class="instructions">
+    Instruktion Block 2<br><br>
+    Legen Sie einen Finger der linken Hand auf die E-Taste für Begriffe, die zur Kategorie <strong>Schlecht</strong> gehören.<br><br>
+    Legen Sie einen Finger der rechten Hand auf die I-Taste für Begriffe, die zur Kategorie <strong>Gut</strong> gehören.<br><br>
+    Die Begriffe erscheinen nacheinander.<br><br>
+    Falls Sie einen Fehler machen, wird ein rotes X angezeigt. Drücken Sie die unten angegebene Taste, um fortzufahren. Versuchen Sie, so schnell wie möglich zu sein, während Sie genau bleiben.<br><br>
+    Drücken Sie Enter, wenn Sie bereit sind zu starten.
+    </div>`,
     choices: ['Enter'],
     on_finish: function(){
-        // +1
         for (let i = 0; i < 4; i++) {
             incrementProgress();
         }
-      }
+    }
 };
 
 var trial_block2 = {
@@ -807,14 +833,14 @@ var trial_block2 = {
             stimulus: jsPsych.timelineVariable('stimulus'),
             stim_key_association: jsPsych.timelineVariable('stim_key_association'),
             html_when_wrong: '<span style="color: red; font-size: 80px">X</span>',
-            bottom_instructions: '<p>If you press the wrong key, a red X will appear. Press the other key to continue</p>',
+            bottom_instructions: '<p>Falls Sie einen Fehler machen, erscheint ein rotes X. Drücken Sie die andere Taste, um fortzufahren.</p>',
             force_correct_key_press: true,
             display_feedback: true,
-            trial_duration: 3000, //Only if display_feedback is false
+            trial_duration: 3000,
             left_category_key: 'e',
             right_category_key: 'i',
-            left_category_label: ['BAD'],
-            right_category_label: ['GOOD'],
+            left_category_label: ['Schlecht'],
+            right_category_label: ['Gut'],
             response_ends_trial: true,
             data: { iat_type: 'practice' }
         }
@@ -840,29 +866,27 @@ var trial_block2 = {
     randomize_order: true,
     repetitions: 2,
     on_finish: function(){
-        // +1
         incrementProgress();
-      } 
+    } 
 };
 
+// Block 3: Instruktion Block 3 & zugehöriger Trial-Block
 var instructions_block3 = {
     type: jsPsychHtmlKeyboardResponse,
-    stimulus: "<div style='position: absolute; top: 18%; left: 20%'>Press e for:<br> " +
-        "<strong>BAD</strong><br>" + "or<br>" + "<strong>Arabic Muslims</strong></div>" + "<div style='position: absolute; top: 18%; right: 20%'>" +
-        "Press i for:<br>" + "<strong>GOOD</strong><br>" + "or<br>" + "<strong>White European</strong></div>" +
-        "<div style='position: relative; top: 42%; margin-left: auto; margin-right: auto'>Use <strong>e</strong> for Bad and for " +
-        "Arabic Muslims People<br>" + "Use <strong>i</strong> for Good and for White European People<br>" +
-        "Each item belongs to only one category.<br><br>" + "If you " +
-        "make a mistake, a red X will appear. Press the keys listed below " +
-        "to continue. Go as fast as you can while being accurate.<br><br> " +
-        "Press Enter when you are ready to start.</div>",
+    stimulus: `<div class="instructions">
+    Instruktion Block 3<br><br>
+    Verwenden Sie die Taste <strong>E</strong> für <strong>Schlecht</strong> und für <strong>Arabisch-muslimische Namen</strong>.<br><br>
+    Verwenden Sie die Taste <strong>I</strong> für <strong>Gut</strong> und für <strong>Weiße europäische Namen</strong>.<br><br>
+    Jeder Begriff gehört nur zu einer Kategorie.<br><br>
+    Falls Sie einen Fehler machen, wird ein rotes X angezeigt. Drücken Sie die unten angegebene Taste, um fortzufahren. Versuchen Sie, so schnell wie möglich zu sein, während Sie genau bleiben.<br><br>
+    Drücken Sie Enter, wenn Sie bereit sind zu starten.
+    </div>`,
     choices: ['Enter'],
     on_finish: function(){
-        // +1
         for (let i = 0; i < 4; i++) {
             incrementProgress();
         }
-      }
+    }
 };
 
 var trial_block3 = {
@@ -872,14 +896,14 @@ var trial_block3 = {
             stimulus: jsPsych.timelineVariable('stimulus'),
             stim_key_association: jsPsych.timelineVariable('stim_key_association'),
             html_when_wrong: '<span style="color: red; font-size: 80px">X</span>',
-            bottom_instructions: '<p>If you press the wrong key, a red X will appear. Press the other key to continue</p>',
+            bottom_instructions: '<p>Falls Sie einen Fehler machen, erscheint ein rotes X. Drücken Sie die andere Taste, um fortzufahren.</p>',
             force_correct_key_press: true,
             display_feedback: true,
-            trial_duration: 3000, //Only if display_feedback is false
+            trial_duration: 3000,
             left_category_key: 'e',
             right_category_key: 'i',
-            left_category_label: ['BAD', 'Arabic Muslims'],
-            right_category_label: ['GOOD', 'White European'],
+            left_category_label: ['Schlecht', 'Arabisch-muslimische Namen'],
+            right_category_label: ['Gut', 'Weiße europäische Namen'],
             response_ends_trial: true,
             data: { iat_type: 'practice' }
         }
@@ -887,7 +911,7 @@ var trial_block3 = {
     timeline_variables: [
         { type: jsPsychIatHtml, stimulus: "Hakim", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Sharif", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Yousef", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Youssef", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Wahib", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Akbar", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Muhsin", stim_key_association: "left" },
@@ -898,9 +922,9 @@ var trial_block3 = {
         { type: jsPsychIatHtml, stimulus: "Ernesto", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Matthias", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Maarten", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Philippe", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Guillame", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Benoit", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Phillipe", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Guillaume", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Benoît", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Takuya", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Kazuki", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Chaiyo", stim_key_association: "right" },
@@ -925,29 +949,27 @@ var trial_block3 = {
     randomize_order: true,
     repetitions: 1,
     on_finish: function(){
-        // +1
         incrementProgress();
-      }
+    }
 };
 
+// Block 4: Instruktion Block 4 & zugehöriger Trial-Block
 var instructions_block4 = {
     type: jsPsychHtmlKeyboardResponse,
-    stimulus: "<div style='position: absolute; top: 18%; left: 20%'>Press e for:<br> " +
-        "<strong>BAD</strong><br>" + "or<br>" + "<strong>Arabic Muslims</strong></div>" + "<div style='position: absolute; top: 18%; right: 20%'>" +
-        "Press i for:<br>" + "<strong>GOOD</strong><br>" + "or<br>" + "<strong>White European</strong></div>" +
-        "<div style='position: relative; top: 42%; margin-left: auto; margin-right: auto'>This is the same as the previous part.<br>" + "Use <strong>e</strong> for Bad and for " +
-        "Arabic Muslims People<br>" + "Use <strong>i</strong> for Good and for White European People<br>" +
-        "Each item belongs to only one category.<br><br>" + "If you " +
-        "make a mistake, a red X will appear. Press the keys listed below " +
-        "to continue. Go as fast as you can while being accurate.<br><br> " +
-        "Press Enter when you are ready to start.</div>",
+    stimulus: `<div class="instructions">
+    Instruktion Block 4<br><br>
+    Verwenden Sie die Taste <strong>E</strong> für <strong>Schlecht</strong> und für <strong>Arabisch-muslimische Namen</strong>.<br><br>
+    Verwenden Sie die Taste <strong>I</strong> für <strong>Gut</strong> und für <strong>Weiße europäische Namen</strong>.<br><br>
+    Jeder Begriff gehört nur zu einer Kategorie.<br><br>
+    Falls Sie einen Fehler machen, wird ein rotes X angezeigt. Drücken Sie die unten angegebene Taste, um fortzufahren. Versuchen Sie, so schnell wie möglich zu sein, während Sie genau bleiben.<br><br>
+    Drücken Sie Enter, wenn Sie bereit sind zu starten.
+    </div>`,
     choices: ['Enter'],
     on_finish: function(){
-        // +1
         for (let i = 0; i < 4; i++) {
             incrementProgress();
         }
-      }
+    }
 };
 
 var trial_block4 = {
@@ -957,22 +979,22 @@ var trial_block4 = {
             stimulus: jsPsych.timelineVariable('stimulus'),
             stim_key_association: jsPsych.timelineVariable('stim_key_association'),
             html_when_wrong: '<span style="color: red; font-size: 80px">X</span>',
-            bottom_instructions: '<p>If you press the wrong key, a red X will appear. Press the other key to continue</p>',
+            bottom_instructions: '<p>Falls Sie einen Fehler machen, erscheint ein rotes X. Drücken Sie die andere Taste, um fortzufahren.</p>',
             force_correct_key_press: true,
             display_feedback: true,
-            trial_duration: 3000, //Only if display_feedback is false
+            trial_duration: 3000,
             left_category_key: 'e',
             right_category_key: 'i',
-            left_category_label: ['BAD', 'Arabic Muslims'],
-            right_category_label: ['GOOD', 'White European'],
+            left_category_label: ['Schlecht', 'Arabisch-muslimische Namen'],
+            right_category_label: ['Gut', 'Weiße europäische Namen'],
             response_ends_trial: true,
-            data: { iat_type: 'bad-Arabic Muslims' }
+            data: { iat_type: 'schlecht-Arabisch' }
         }
     ],
     timeline_variables: [
         { type: jsPsychIatHtml, stimulus: "Hakim", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Sharif", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Yousef", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Youssef", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Wahib", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Akbar", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Muhsin", stim_key_association: "left" },
@@ -983,14 +1005,14 @@ var trial_block4 = {
         { type: jsPsychIatHtml, stimulus: "Ernesto", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Matthias", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Maarten", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Philippe", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Guillame", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Benoit", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Phillipe", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Guillaume", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Benoît", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Takuya", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Kazuki", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Chaiyo", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Marcelo", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Hurtful", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Hurtful", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Hatred", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Horrible", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Dirty", stim_key_association: "left" },
@@ -1010,27 +1032,27 @@ var trial_block4 = {
     randomize_order: true,
     repetitions: 2,
     on_finish: function(){
-        // +1
         incrementProgress();
-      }
+    }
 };
 
+// Block 5: Instruktion Block 5 & zugehöriger Trial-Block
 var instructions_block5 = {
     type: jsPsychHtmlKeyboardResponse,
-    stimulus: "<div style='position: absolute; top: 18%; left: 20%'>Press e for:<br>" + "<strong>White European</strong></div>" +
-        "<div style='position: absolute; top: 18%; right: 20%'>Press i for:<br>" + "<strong>Arabic Muslims</strong></div>" +
-        "<div style='position: relative; top: 42%; margin-left: auto; margin-right: auto'>Watch out, the labels have changed positions!<br>" +
-        "Use <strong>e</strong> for White European People<br>" + "Use <strong>i</strong> for Arabic Muslims People<br><br>" +
-        "If you make a mistake, a red X will appear. Press the keys listed below " +
-        "to continue. Go as fast as you can while being accurate.<br><br> " +
-        "Press Enter when you are ready to start.</div>",
+    stimulus: `<div class="instructions">
+    Instruktion Block 5<br><br>
+    Achtung, die Zuordnungen haben sich geändert!<br><br>
+    Verwenden Sie die Taste <strong>E</strong> für <strong>Weiße europäische Namen</strong>.<br><br>
+    Verwenden Sie die Taste <strong>I</strong> für <strong>Arabisch-muslimische Namen</strong>.<br><br>
+    Falls Sie einen Fehler machen, wird ein rotes X angezeigt. Drücken Sie die unten angegebene Taste, um fortzufahren. Versuchen Sie, so schnell wie möglich zu sein, während Sie genau bleiben.<br><br>
+    Drücken Sie Enter, wenn Sie bereit sind zu starten.
+    </div>`,
     choices: ['Enter'],
     on_finish: function(){
-        // +1
         for (let i = 0; i < 4; i++) {
             incrementProgress();
         }
-      }
+    }
 };
 
 var trial_block5 = {
@@ -1040,22 +1062,22 @@ var trial_block5 = {
             stimulus: jsPsych.timelineVariable('stimulus'),
             stim_key_association: jsPsych.timelineVariable('stim_key_association'),
             html_when_wrong: '<span style="color: red; font-size: 80px">X</span>',
-            bottom_instructions: '<p>If you press the wrong key, a red X will appear. Press the other key to continue</p>',
+            bottom_instructions: '<p>Falls Sie einen Fehler machen, erscheint ein rotes X. Drücken Sie die andere Taste, um fortzufahren.</p>',
             force_correct_key_press: true,
             display_feedback: true,
-            trial_duration: 3000, //Only if display_feedback is false
+            trial_duration: 3000,
             left_category_key: 'e',
             right_category_key: 'i',
-            left_category_label: ['White European'],
-            right_category_label: ['Arabic Muslims'],
+            left_category_label: ['Weiße europäische Namen'],
+            right_category_label: ['Arabisch-muslimische Namen'],
             response_ends_trial: true,
-            data: { iat_type: 'practice' }
+            data: { iat_type: 'umgekehrt' }
         }
     ],
     timeline_variables: [
         { type: jsPsychIatHtml, stimulus: "Hakim", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Sharif", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Yousef", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Youssef", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Wahib", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Akbar", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Muhsin", stim_key_association: "right" },
@@ -1066,39 +1088,37 @@ var trial_block5 = {
         { type: jsPsychIatHtml, stimulus: "Ernesto", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Matthias", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Maarten", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Philippe", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Guillame", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Benoit", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Phillipe", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Guillaume", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Benoît", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Takuya", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Kazuki", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Chaiyo", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Marcelo", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Marcelo", stim_key_association: "left" }
     ],
     randomize_order: true,
     repetitions: 2,
     on_finish: function(){
-        // +1
         incrementProgress();
-      }
+    }
 };
 
+// Block 6: Instruktion Block 6 & zugehöriger Trial-Block
 var instructions_block6 = {
     type: jsPsychHtmlKeyboardResponse,
-    stimulus: "<div style='position: absolute; top: 18%; left: 20%'>Press e for:<br>" + "<strong>BAD</strong><br>" + "or<br>" +
-        "<strong>White European</strong></div>" + "<div style='position: absolute; top: 18%; right: 20%'>Press i for:<br>" + "<strong>GOOD</strong><br>" + "or<br>" +
-        "<strong>Arabic Muslims</strong></div>" +
-        "<div style='position: relative; top: 42%; margin-left: auto; margin-right: auto'>Use <strong>e</strong> for Bad and for White European People<br>" +
-        "Use <strong>i</strong> for Good and for Arabic Muslims People<br><br>" +
-        "If you make a mistake, a red X will appear. Press the keys listed below " +
-        "to continue. Go as fast as you can while being accurate.<br><br> " +
-        "Press Enter when you are ready to start.</div>",
+    stimulus: `<div class="instructions">
+    Instruktion Block 6<br><br>
+    Verwenden Sie die Taste <strong>E</strong> für <strong>Schlecht</strong> und für <strong>weiße europäische Namen</strong>.<br><br>
+    Verwenden Sie die Taste <strong>I</strong> für <strong>Gut</strong> und für <strong>Arabisch-muslimische Namen</strong>.<br><br>
+    Falls Sie einen Fehler machen, wird ein rotes X angezeigt. Drücken Sie die unten angegebenen Tasten, um fortzufahren. Versuchen Sie, so schnell wie möglich zu sein, während Sie genau bleiben.<br><br>
+    Drücken Sie Enter, wenn Sie bereit sind zu starten.
+    </div>`,
     choices: ['Enter'],
     on_finish: function(){
-        // +1
         for (let i = 0; i < 4; i++) {
             incrementProgress();
         }
-      }
+    }
 };
 
 var trial_block6 = {
@@ -1108,22 +1128,22 @@ var trial_block6 = {
             stimulus: jsPsych.timelineVariable('stimulus'),
             stim_key_association: jsPsych.timelineVariable('stim_key_association'),
             html_when_wrong: '<span style="color: red; font-size: 80px">X</span>',
-            bottom_instructions: '<p>If you press the wrong key, a red X will appear. Press the other key to continue</p>',
+            bottom_instructions: '<p>Falls Sie einen Fehler machen, erscheint ein rotes X. Drücken Sie die andere Taste, um fortzufahren.</p>',
             force_correct_key_press: true,
             display_feedback: true,
-            trial_duration: 3000, //Only if display_feedback is false
+            trial_duration: 3000,
             left_category_key: 'e',
             right_category_key: 'i',
-            left_category_label: ['BAD', 'White European'],
-            right_category_label: ['GOOD', 'Arabic Muslims'],
+            left_category_label: ['Schlecht', 'weiße europäische Namen'],
+            right_category_label: ['Gut', 'Arabisch-muslimische Namen'],
             response_ends_trial: true,
-            data: { iat_type: 'practice' }
+            data: { iat_type: 'gemischt' }
         }
     ],
     timeline_variables: [
         { type: jsPsychIatHtml, stimulus: "Hakim", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Sharif", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Yousef", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Youssef", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Wahib", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Akbar", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Muhsin", stim_key_association: "right" },
@@ -1134,9 +1154,9 @@ var trial_block6 = {
         { type: jsPsychIatHtml, stimulus: "Ernesto", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Matthias", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Maarten", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Philippe", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Guillame", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Benoit", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Phillipe", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Guillaume", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Benoît", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Takuya", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Kazuki", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Chaiyo", stim_key_association: "left" },
@@ -1165,30 +1185,28 @@ var trial_block6 = {
     randomize_order: true,
     repetitions: 1,
     on_finish: function(){
-        // +1
         incrementProgress();
-      }
+    }
 };
 
+// Block 7: Instruktion Block 7 & zugehöriger Trial-Block
 var instructions_block7 = {
     type: jsPsychHtmlKeyboardResponse,
-    stimulus: "<div style='position: absolute; top: 18%; left: 20%'>Press e for:<br>" + "<strong>Bad</strong><br>" + "or<br>" +
-        "<strong>White European People</strong></div>" + "<div style='position: absolute; top: 18%; right: 20%'>Press i for:<br>" + "<strong>Good</strong><br>" + "or<br>" +
-        "<strong>Arabic Muslims People</strong></div>" +
-        "<div style='position: relative; top: 42%; margin-left: auto; margin-right: auto'>This is the same as the previous part<br>" +
-        "Use <strong>e</strong> for Bad and for White European People<br>" +
-        "Use <strong>i</strong> for Good and for Arabic Muslims People<br>" +
-        "Each item belongs to only one category<br><br>" +
-        "If you make a mistake, a red X will appear. Press the keys listed below " +
-        "to continue. Go as fast as you can while being accurate.<br><br> " +
-        "Press Enter when you are ready to start.</div>",
+    stimulus: `<div class="instructions">
+    Instruktion Block 7<br><br>
+    Dies ist die gleiche Tastenzuweisung wie im vorherigen Abschnitt.<br><br>
+    Verwenden Sie die Taste <strong>E</strong> für <strong>Schlecht</strong> und für <strong>weiße europäische Namen</strong>.<br><br>
+    Verwenden Sie die Taste <strong>I</strong> für <strong>Gut</strong> und für <strong>Arabisch-muslimische Namen</strong>.<br><br>
+    Jeder Begriff gehört nur zu einer Kategorie.<br><br>
+    Falls Sie einen Fehler machen, wird ein rotes X angezeigt. Drücken Sie die unten angegebene Taste, um fortzufahren. Versuchen Sie, so schnell wie möglich zu sein, während Sie genau bleiben.<br><br>
+    Drücken Sie Enter, wenn Sie bereit sind zu starten.
+    </div>`,
     choices: ['Enter'],
     on_finish: function(){
-        // +1
         for (let i = 0; i < 4; i++) {
             incrementProgress();
         }
-      }
+    }
 };
 
 var trial_block7 = {
@@ -1198,22 +1216,22 @@ var trial_block7 = {
             stimulus: jsPsych.timelineVariable('stimulus'),
             stim_key_association: jsPsych.timelineVariable('stim_key_association'),
             html_when_wrong: '<span style="color: red; font-size: 80px">X</span>',
-            bottom_instructions: '<p>If you press the wrong key, a red X will appear. Press the other key to continue</p>',
+            bottom_instructions: '<p>Falls Sie einen Fehler machen, erscheint ein rotes X. Drücken Sie die andere Taste, um fortzufahren.</p>',
             force_correct_key_press: true,
             display_feedback: true,
-            trial_duration: 3000, //Only if display_feedback is false
+            trial_duration: 3000,
             left_category_key: 'e',
             right_category_key: 'i',
-            left_category_label: ['BAD', 'White European'],
-            right_category_label: ['GOOD', 'Arabic Muslims'],
+            left_category_label: ['Schlecht', 'weiße europäische Namen'],
+            right_category_label: ['Gut', 'Arabisch-muslimische Namen'],
             response_ends_trial: true,
-            data: { iat_type: 'bad-White European' }
+            data: { iat_type: 'schlecht-weiß' }
         }
     ],
     timeline_variables: [
         { type: jsPsychIatHtml, stimulus: "Hakim", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Sharif", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Yousef", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Youssef", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Wahib", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Akbar", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Muhsin", stim_key_association: "right" },
@@ -1224,9 +1242,9 @@ var trial_block7 = {
         { type: jsPsychIatHtml, stimulus: "Ernesto", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Matthias", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Maarten", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Philippe", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Guillame", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Benoit", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Phillipe", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Guillaume", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Benoît", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Takuya", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Kazuki", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Chaiyo", stim_key_association: "left" },
@@ -1251,18 +1269,31 @@ var trial_block7 = {
     randomize_order: true,
     repetitions: 2,
     on_finish: function(){
-        // +1
         incrementProgress();
-      }
+    }
 };
 
-
+// Gesamttimeline des IAT
 var IAT_trial = {
-    timeline: [category_block, instructions_block, trial_block, instructions_block2, trial_block2,
-        instructions_block3, trial_block3, instructions_block4, trial_block4, instructions_block5,
-        trial_block5, instructions_block6, trial_block6, instructions_block7, trial_block7
-    ],
-}
+    timeline: [
+        category_block,
+        instructions_iat,
+        instructions_block,
+        trial_block,
+        instructions_block2,
+        trial_block2,
+        instructions_block3,
+        trial_block3,
+        instructions_block4,
+        trial_block4,
+        instructions_block5,
+        trial_block5,
+        instructions_block6,
+        trial_block6,
+        instructions_block7,
+        trial_block7
+    ]
+};
 
 const survey_trial = {
     type: jsPsychSurvey,
@@ -1512,12 +1543,17 @@ const mail_trial = {
   };
 
 timeline.push(preload);
-timeline.push(instructions);
+/*
+timeline.push(instructions)
+*/
 timeline.push(codeErstellen);
+/*
 timeline.push(einverstaendniserklaerung);
 timeline.push(instructions_1);
 timeline.push(instruktionenVerstanden);
+*/
 timeline.push(instructions1_2);
+/*
 timeline.push(preload2);
 timeline.push(extinction_phase);
 timeline.push(instructions_2);
@@ -1525,7 +1561,10 @@ timeline.push(test_procedure);
 timeline.push(instructions_3);
 timeline.push(preload3);
 timeline.push(test_phase);
+*/
 timeline.push(IAT_trial);
+/*
 timeline.push(survey_trial);
 timeline.push(debrief);
 timeline.push(mail_trial);
+*/
