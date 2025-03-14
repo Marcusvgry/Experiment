@@ -24,6 +24,7 @@ const jsPsych = initJsPsych({
         // Zusätzliche Daten
         var csv = jsPsych.data.get().csv();
 
+
         // 
         // Sende Daten An Server
 
@@ -51,8 +52,12 @@ const jsPsych = initJsPsych({
         console.log(data);
         */
 
-
         jsPsych.data.addProperties({
+            Teilnahme_Pilotstudie: Teilnahme_Pilotstudie, 
+            mean_correct_responses_bad_Arabic_Muslims: mean_bad_Arabic,
+            mean_correct_responses_bad_White_European: mean_bad_White,
+            sd: sd,
+            d: d,
             co_ans_be_corr_be_we: co_ans_be_corr_be_we,
             co_ans_str_corr_str_we: co_ans_str_corr_str_we,
             fa_ans_neu_corr_be_we: fa_ans_neu_corr_be_we,
@@ -71,7 +76,8 @@ const jsPsych = initJsPsych({
             fa_ans_str_corr_neu_na: fa_ans_str_corr_neu_na,
             fa_ans_be_corr_neu_we: fa_ans_be_corr_neu_we,
             fa_ans_str_corr_neu_we: fa_ans_str_corr_neu_we
-        })
+        });
+
 
         jsPsych.data.displayData();
 
@@ -109,6 +115,18 @@ var fa_ans_be_corr_neu_we = 0;
 var fa_ans_str_corr_neu_we = 0;
 
 var Teilnahme_Pilotstudie = 'Nein';
+
+// Variablen IAT
+
+var bad_Arabic_Muslims;
+var mean_bad_Arabic;
+var bad_White_European;
+var mean_bad_White;
+var combinedData;
+var sd;
+var d;
+
+
 
 // -- Arrays ---------------------------------------------------------------------------------------------------------
 // Arrays Gesichter + Randomisierung
@@ -311,18 +329,19 @@ var codeErstellen = {
     <div class="instructions">
     <p> Code: <input name="code" type="text" required="true"/>
     </div>`,
-    on_finish: function(data){
-        var eingabe = data.response.code.toUpperCase(); 
-
+    on_finish: function(data) {
+        // Zugriff auf die Eingabe
+        var eingabe = data.response.code.toUpperCase();
+        
+        // Verarbeiten der Eingabe (hier z.B. Überprüfung, ob der Code in codes enthalten ist)
         if (codes.includes(eingabe)) {
             Teilnahme_Pilotstudie = 'Ja';
         }
+        
+        // Entfernen der sensiblen Eingabe aus dem finalen Datensatz
+        data.response = {};
 
-        //Füge Variable Teilnahme_Pilotstudie zu jsPsych.data hinzu
-        jsPsych.data.addProperties({
-            Teilnahme_Pilotstudie: Teilnahme_Pilotstudie
-        });
-
+        // Fortschritt erhöhen
         for (let i = 0; i < 4; i++) {
             incrementProgress();
         }
@@ -396,7 +415,7 @@ var instruktionenVerstanden = {
         nicht zu 3 <br>  = stimme nicht zu <br>  4 = neutral <br>  5 = stimme zu <br>  6 = stimme stark zu <br> 7 = stimme 
         absolut zu
         </div>`,
-    html: `<i> Ich habe die Instruktionen der Studie verstanden. <i>.
+    html: `<i> Ich habe die Instruktionen der Studie verstanden. <i>
      <input type="checkbox" id="consent-checkboxInstructions" required>
          <br> <br>
          `,
@@ -459,7 +478,7 @@ const extinction_phase = {
             slider_width: 800,
             require_movement: true,
             on_finish: function(){
-                for (let i = 0; i < 4; i++) s{
+                for (let i = 0; i < 4; i++) {
                     incrementProgress();
                 }
               }
@@ -602,87 +621,92 @@ var preload3 = {
     images: timeline_test.map(variable => variable.face)
 };
 
-const test_phase = {
+var test_phase = {
     timeline: [
         {
-            type: jsPsychImageButtonResponse,
-            stimulus: jsPsych.timelineVariable('face'),
-            prompt: '<p>Haben Sie diese Person im ersten Durchgang gesehen?</p>',
-            choices: ['Nein', 'Ja, ich habe etwas über deren Straftat erfahren', 'Ja, ich habe etwas über deren Beruf erfahren.'],
-            on_finish: function (data) {
-                for (let i = 0; i < 4; i++) {
-                    incrementProgress();
+                type: jsPsychImageButtonResponse,
+                stimulus: jsPsych.timelineVariable('face'),
+                prompt: '<p>Haben Sie diese Person im ersten Durchgang gesehen?</p>',
+                choices: ['Nein', 'Ja, ich habe etwas über deren Straftat erfahren', 'Ja, ich habe etwas über deren Beruf erfahren.'],
+                // Hier werden die Timeline-Variablen explizit in den Trial-Daten gespeichert:
+                data: {
+                    face: jsPsych.timelineVariable('face'),
+                    berstr: jsPsych.timelineVariable('berstr')
+                },
+                on_finish: function (data) {
+                    for (let i = 0; i < 4; i++) {
+                        incrementProgress();
+                    }
+                    
+                    var currentface = data.face;
+                    var isBerOrStr = data.berstr;
+                    var response = parseInt(data.response);
+                    
+                    
+                
+                    if (faces_new_all.includes(currentface)) {
+                        if (response === 0) { // Antwort "Neu"
+                            if (faces_nahost_arabisch_new.includes(currentface)) {
+                                co_ans_neu_corr_neu_na++;
+                            } else if (faces_weisz_europaeisch_new.includes(currentface)) {
+                                co_ans_neu_corr_neu_we++;
+                            }
+                        } else if (response === 1) { // Antwort "Straftat"
+                            if (faces_nahost_arabisch_new.includes(currentface)) {
+                                fa_ans_str_corr_neu_na++;
+                            } else if (faces_weisz_europaeisch_new.includes(currentface)) {
+                                fa_ans_str_corr_neu_we++;
+                            }
+                        } else if (response === 2) { // Antwort "Beruf"
+                            if (faces_nahost_arabisch_new.includes(currentface)) {
+                                fa_ans_be_corr_neu_na++;
+                            } else if (faces_weisz_europaeisch_new.includes(currentface)) {
+                                fa_ans_be_corr_neu_we++;
+                            }
+                        }
+                    } else if (faces_weisz_europaeisch_old.includes(currentface)) {
+                        if (response === 0) { // Antwort "Neu"
+                            if (Berufe_weisz_europaeisch.includes(isBerOrStr)) {
+                                fa_ans_neu_corr_be_we++;
+                            } else if (Straftaten_weisz_europaeisch.includes(isBerOrStr)) {
+                                fa_ans_neu_corr_str_we++;
+                            }
+                        } else if (response === 1) { // Antwort "Straftat"
+                            if (Berufe_weisz_europaeisch.includes(isBerOrStr)) {
+                                fa_ans_str_corr_be_we++;
+                            } else if (Straftaten_weisz_europaeisch.includes(isBerOrStr)) {
+                                co_ans_str_corr_str_we++;
+                            }
+                        } else if (response === 2) { // Antwort "Beruf"
+                            if (Berufe_weisz_europaeisch.includes(isBerOrStr)) {
+                                co_ans_be_corr_be_we++;
+                            } else if (Straftaten_weisz_europaeisch.includes(isBerOrStr)) {
+                                fa_ans_be_corr_str_we++;
+                            }
+                        }
+                    } else if (faces_nahost_arabisch_old.includes(currentface)) {
+                        if (response === 0) { // Antwort "Neu"
+                            if (Berufe_nahoestlich_arabisch.includes(isBerOrStr)) {
+                                fa_ans_neu_corr_be_na++;
+                            } else if (Straftaten_nahoestlich_arabisch.includes(isBerOrStr)) {
+                                fa_ans_neu_corr_str_na++;
+                            }
+                        } else if (response === 1) { // Antwort "Straftat"
+                            if (Berufe_nahoestlich_arabisch.includes(isBerOrStr)) {
+                                fa_ans_str_corr_be_na++;
+                            } else if (Straftaten_nahoestlich_arabisch.includes(isBerOrStr)) {
+                                co_ans_str_corr_str_na++;
+                            }
+                        } else if (response === 2) { // Antwort "Beruf"
+                            if (Berufe_nahoestlich_arabisch.includes(isBerOrStr)) {
+                                co_ans_be_corr_be_na++;
+                            } else if (Straftaten_nahoestlich_arabisch.includes(isBerOrStr)) {
+                                fa_ans_be_corr_str_na++;
+                            }
+                        }
+                    }
                 }
-                var isBerOrStr = jsPsych.timelineVariable('berstr', true);
-                var currentface = jsPsych.timelineVariable('face', true);
-                var response = data.response;
-
-                if (faces_new_all.includes(currentface)) {
-                    if (response == 0) { // Antwort Neu
-                        if (faces_nahost_arabisch_new.includes(currentface)) {
-                            co_ans_neu_corr_neu_na++;
-                        }
-                        else if (faces_weisz_europaeisch_new.includes(currentface)) {
-                            co_ans_neu_corr_neu_we++;
-                        }
-                    } else if (response == 1) { // Antwort Straftat
-                        if (faces_nahost_arabisch_new.includes(currentface)) {
-                            fa_ans_str_corr_neu_na++;
-                        }
-                        else if (faces_weisz_europaeisch_new.includes(currentface)) {
-                            fa_ans_str_corr_neu_we++;
-                        }
-                    } else if (response == 2) { // Antwort Beruf
-                        if (faces_nahost_arabisch_new.includes(currentface)) {
-                            fa_ans_be_corr_neu_na++;
-                        }
-                        else if (faces_weisz_europaeisch_new.includes(currentface)) {
-                            fa_ans_be_corr_neu_we++;
-                        }
-                    }
-                } else if (faces_weisz_europaeisch_old.includes(currentface)) {
-                    if (response == 0) { // Antwort Neu
-                        if (Berufe_weisz_europaeisch.includes(isBerOrStr)) {
-                            fa_ans_neu_corr_be_we++;
-                        } else if (Straftaten_weisz_europaeisch.includes(isBerOrStr)) {
-                            fa_ans_neu_corr_str_we++;
-                        }
-                    } else if (response == 1) { // Antwort Straftat
-                        if (Berufe_weisz_europaeisch.includes(isBerOrStr)) {
-                            fa_ans_str_corr_be_we++;
-                        } else if (Straftaten_weisz_europaeisch.includes(isBerOrStr)) {
-                            co_ans_str_corr_str_we++;
-                        }
-                    } else if (response == 2) { // Antwort Beruf
-                        if (Berufe_weisz_europaeisch.includes(isBerOrStr)) {
-                            co_ans_be_corr_be_we++;
-                        } else if (Straftaten_weisz_europaeisch.includes(isBerOrStr)) {
-                            fa_ans_be_corr_str_we++;
-                        }
-                    }
-                } else if (faces_nahost_arabisch_randomized.includes(currentface)) {
-                    if (response == 0) { // Antwort Neu
-                        if (Berufe_nahoestlich_arabisch.includes(isBerOrStr)) {
-                            fa_ans_neu_corr_be_na++;
-                        } else if (Straftaten_nahoestlich_arabisch.includes(isBerOrStr)) {
-                            fa_ans_neu_corr_str_na++;
-                        }
-                    } else if (response == 1) { // Antwort Straftat
-                        if (Berufe_nahoestlich_arabisch.includes(isBerOrStr)) {
-                            fa_ans_str_corr_be_na++;
-                        } else if (Straftaten_nahoestlich_arabisch.includes(isBerOrStr)) {
-                            co_ans_str_corr_str_na++;
-                        }
-                    } else if (response == 2) { // Antwort Beruf
-                        if (Berufe_nahoestlich_arabisch.includes(isBerOrStr)) {
-                            co_ans_be_corr_be_na++;
-                        } else if (Straftaten_nahoestlich_arabisch.includes(isBerOrStr)) {
-                            fa_ans_be_corr_str_na++;
-                        }
-                    }
-                }
-            }
-        },
+            }      
     ],
     timeline_variables: timeline_test,
     randomize_order: true,
@@ -695,8 +719,6 @@ var instructions_iat = {
     type: jsPsychInstructions,
     pages: [
         `<div class="instructions">
-        IAT<br><br>
-        Platzhalter Text Instruktionen IAT 1<br><br>
         Im Folgenden bitten wir Sie, verschiedene Begriffe den passenden Kategorien zuzuordnen.<br><br>
         Versuchen Sie bitte so schnell und genau wie möglich zu entscheiden, welcher Begriff zu welcher Kategorie gehört. Ihre Auswahl treffen Sie durch das Drücken der Computertasten <b>E</b> und <b>I</b>.<br><br>
         Vor jedem Durchgang erhalten Sie eine kurze Anleitung, welche Taste für welche Kategorie steht. Bitte lesen Sie diese Instruktionen sorgfältig durch. In einigen Durchgängen sind die Tasten jeweils mit zwei Kategorien verknüpft. Anschließend werden Ihnen die Begriffe nacheinander angezeigt.<br><br>
@@ -717,8 +739,7 @@ var category_block = {
     type: jsPsychInstructions,
     pages: [
         `<div class="instructions">
-        Instruktionen Tastatur/Kategorien:<br><br>
-        Als Nächstes werden Sie die Computertasten E und I verwenden, um die Begriffe so schnell wie möglich den entsprechenden Kategorien zuzuordnen.<br><br>
+        Als Nächstes werden Sie die Computertasten <b> E </b> und <b> I </b> verwenden, um die Begriffe so schnell wie möglich den entsprechenden Kategorien zuzuordnen.<br><br>
         Dies sind die vier Kategorien und die dazugehörigen Begriffe:<br><br>
         <strong>Gut:</strong><br>
         Triumph, Freundschaft, Fröhlich, Lachen, Freude, Glücklich, Freudig, Freund<br><br>
@@ -744,12 +765,11 @@ var category_block = {
 var instructions_block = {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: `<div class="instructions">
-    Instruktion Block 1<br><br>
-    Legen Sie einen Finger der linken Hand auf die E-Taste für Begriffe, die zur Kategorie <strong>Arabisch-muslimische Namen</strong> gehören.<br><br>
-    Legen Sie einen Finger der rechten Hand auf die I-Taste für Begriffe, die zur Kategorie <strong>Weiße europäische Namen</strong> gehören.<br><br>
+    Legen Sie einen Finger der linken Hand auf die <b>E</b>-Taste für Begriffe, die zur Kategorie <strong>Arabisch-muslimische Namen</strong> gehören.<br><br>
+    Legen Sie einen Finger der rechten Hand auf die <b>I</b>-Taste für Begriffe, die zur Kategorie <strong>Weiße europäische Namen</strong> gehören.<br><br>
     Die Begriffe erscheinen nacheinander.<br><br>
-    Falls Sie einen Fehler machen, wird ein rotes X angezeigt. Drücken Sie die unten angegebene Taste, um fortzufahren. Versuchen Sie, so schnell wie möglich zu sein, während Sie genau bleiben.<br><br>
-    Drücken Sie Enter, wenn Sie bereit sind zu starten.
+    Falls Sie einen Fehler machen, wird ein rotes <b>X</b> angezeigt. Drücken Sie die unten angegebene Taste, um fortzufahren. Versuchen Sie, so schnell wie möglich zu sein, während Sie genau bleiben.<br><br>
+    Drücken Sie <b>Enter</b>, wenn Sie bereit sind zu starten.
     </div>`,
     choices: ['Enter'],
     on_finish: function() {
@@ -766,7 +786,7 @@ var trial_block = {
             stimulus: jsPsych.timelineVariable('stimulus'),
             stim_key_association: jsPsych.timelineVariable('stim_key_association'),
             html_when_wrong: '<span style="color: red; font-size: 80px">X</span>',
-            bottom_instructions: '<p>Falls Sie einen Fehler machen, erscheint ein rotes X. Drücken Sie die andere Taste, um fortzufahren.</p>',
+            bottom_instructions: '<p>Falls Sie einen Fehler machen, erscheint ein rotes <b>X</b>. Drücken Sie die andere Taste, um fortzufahren.</p>',
             force_correct_key_press: true,
             display_feedback: true,
             trial_duration: 3000,
@@ -811,12 +831,11 @@ var trial_block = {
 var instructions_block2 = {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: `<div class="instructions">
-    Instruktion Block 2<br><br>
-    Legen Sie einen Finger der linken Hand auf die E-Taste für Begriffe, die zur Kategorie <strong>Schlecht</strong> gehören.<br><br>
-    Legen Sie einen Finger der rechten Hand auf die I-Taste für Begriffe, die zur Kategorie <strong>Gut</strong> gehören.<br><br>
+    Legen Sie einen Finger der <b>linken Hand</b> auf die <b>E</b>-Taste für Begriffe, die zur Kategorie <strong>Schlecht</strong> gehören.<br><br>
+    Legen Sie einen Finger der <b>rechten Hand</b> auf die <b>I</b>-Taste für Begriffe, die zur Kategorie <strong>Gut</strong> gehören.<br><br>
     Die Begriffe erscheinen nacheinander.<br><br>
-    Falls Sie einen Fehler machen, wird ein rotes X angezeigt. Drücken Sie die unten angegebene Taste, um fortzufahren. Versuchen Sie, so schnell wie möglich zu sein, während Sie genau bleiben.<br><br>
-    Drücken Sie Enter, wenn Sie bereit sind zu starten.
+    Falls Sie einen Fehler machen, wird ein rotes <b>X</b> angezeigt. Drücken Sie die unten angegebene Taste, um fortzufahren. Versuchen Sie, so schnell wie möglich zu sein, während Sie genau bleiben.<br><br>
+    Drücken Sie <b>Enter</b>, wenn Sie bereit sind zu starten.
     </div>`,
     choices: ['Enter'],
     on_finish: function(){
@@ -833,7 +852,7 @@ var trial_block2 = {
             stimulus: jsPsych.timelineVariable('stimulus'),
             stim_key_association: jsPsych.timelineVariable('stim_key_association'),
             html_when_wrong: '<span style="color: red; font-size: 80px">X</span>',
-            bottom_instructions: '<p>Falls Sie einen Fehler machen, erscheint ein rotes X. Drücken Sie die andere Taste, um fortzufahren.</p>',
+            bottom_instructions: '<p>Falls Sie einen Fehler machen, erscheint ein rotes <b>X</b>. Drücken Sie die andere Taste, um fortzufahren.</p>',
             force_correct_key_press: true,
             display_feedback: true,
             trial_duration: 3000,
@@ -846,22 +865,22 @@ var trial_block2 = {
         }
     ],
     timeline_variables: [
-        { stimulus: "Hurtful", stim_key_association: "left" },
-        { stimulus: "Hatred", stim_key_association: "left" },
-        { stimulus: "Horrible", stim_key_association: "left" },
-        { stimulus: "Dirty", stim_key_association: "left" },
-        { stimulus: "Failure", stim_key_association: "left" },
-        { stimulus: "Angry", stim_key_association: "left" },
-        { stimulus: "Pain", stim_key_association: "left" },
-        { stimulus: "Ugly", stim_key_association: "left" },
-        { stimulus: "Fabulous", stim_key_association: "right" },
-        { stimulus: "Excitement", stim_key_association: "right" },
-        { stimulus: "Glorious", stim_key_association: "right" },
-        { stimulus: "Cheerful", stim_key_association: "right" },
-        { stimulus: "Cherish", stim_key_association: "right" },
-        { stimulus: "Enjoy", stim_key_association: "right" },
-        { stimulus: "Delightful", stim_key_association: "right" },
-        { stimulus: "Joyous", stim_key_association: "right" }
+        { stimulus: "Schmerz", stim_key_association: "left" },
+        { stimulus: "Verletzend", stim_key_association: "left" },
+        { stimulus: "Hass", stim_key_association: "left" },
+        { stimulus: "Schmutzig", stim_key_association: "left" },
+        { stimulus: "Misserfolg", stim_key_association: "left" },
+        { stimulus: "Wütend", stim_key_association: "left" },
+        { stimulus: "Schrecklich", stim_key_association: "left" },
+        { stimulus: "Hässlich", stim_key_association: "left" },
+        { stimulus: "Triumph", stim_key_association: "right" },
+        { stimulus: "Freundschaft", stim_key_association: "right" },
+        { stimulus: "Fröhlich", stim_key_association: "right" },
+        { stimulus: "Lachen", stim_key_association: "right" },
+        { stimulus: "Freude", stim_key_association: "right" },
+        { stimulus: "Glücklich", stim_key_association: "right" },
+        { stimulus: "Freudig", stim_key_association: "right" },
+        { stimulus: "Freund", stim_key_association: "right" }
     ],
     randomize_order: true,
     repetitions: 2,
@@ -874,12 +893,11 @@ var trial_block2 = {
 var instructions_block3 = {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: `<div class="instructions">
-    Instruktion Block 3<br><br>
     Verwenden Sie die Taste <strong>E</strong> für <strong>Schlecht</strong> und für <strong>Arabisch-muslimische Namen</strong>.<br><br>
     Verwenden Sie die Taste <strong>I</strong> für <strong>Gut</strong> und für <strong>Weiße europäische Namen</strong>.<br><br>
     Jeder Begriff gehört nur zu einer Kategorie.<br><br>
-    Falls Sie einen Fehler machen, wird ein rotes X angezeigt. Drücken Sie die unten angegebene Taste, um fortzufahren. Versuchen Sie, so schnell wie möglich zu sein, während Sie genau bleiben.<br><br>
-    Drücken Sie Enter, wenn Sie bereit sind zu starten.
+    Falls Sie einen Fehler machen, wird ein rotes <b>X</b> angezeigt. Drücken Sie die unten angegebene Taste, um fortzufahren. Versuchen Sie, so schnell wie möglich zu sein, während Sie genau bleiben.<br><br>
+    Drücken Sie <b>Enter</b>, wenn Sie bereit sind zu starten.
     </div>`,
     choices: ['Enter'],
     on_finish: function(){
@@ -896,7 +914,7 @@ var trial_block3 = {
             stimulus: jsPsych.timelineVariable('stimulus'),
             stim_key_association: jsPsych.timelineVariable('stim_key_association'),
             html_when_wrong: '<span style="color: red; font-size: 80px">X</span>',
-            bottom_instructions: '<p>Falls Sie einen Fehler machen, erscheint ein rotes X. Drücken Sie die andere Taste, um fortzufahren.</p>',
+            bottom_instructions: '<p>Falls Sie einen Fehler machen, erscheint ein rotes <b>X</b>. Drücken Sie die andere Taste, um fortzufahren.</p>',
             force_correct_key_press: true,
             display_feedback: true,
             trial_duration: 3000,
@@ -929,22 +947,22 @@ var trial_block3 = {
         { type: jsPsychIatHtml, stimulus: "Kazuki", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Chaiyo", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Marcelo", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Hurtful", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Hatred", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Horrible", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Dirty", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Failure", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Angry", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Pain", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Ugly", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Fabulous", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Excitement", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Glorious", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Cheerful", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Cherish", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Enjoy", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Delightful", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Joyous", stim_key_association: "right" }
+        { type: jsPsychIatHtml, stimulus: "Schmerz", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Verletzend", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Hass", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Schmutzig", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Misserfolg", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Wütend", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Schrecklich", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Hässlich", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Triumph", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Freundschaft", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Fröhlich", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Lachen", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Freude", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Glücklich", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Freudig", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Freund", stim_key_association: "right" }
     ],
     randomize_order: true,
     repetitions: 1,
@@ -957,12 +975,11 @@ var trial_block3 = {
 var instructions_block4 = {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: `<div class="instructions">
-    Instruktion Block 4<br><br>
     Verwenden Sie die Taste <strong>E</strong> für <strong>Schlecht</strong> und für <strong>Arabisch-muslimische Namen</strong>.<br><br>
     Verwenden Sie die Taste <strong>I</strong> für <strong>Gut</strong> und für <strong>Weiße europäische Namen</strong>.<br><br>
     Jeder Begriff gehört nur zu einer Kategorie.<br><br>
-    Falls Sie einen Fehler machen, wird ein rotes X angezeigt. Drücken Sie die unten angegebene Taste, um fortzufahren. Versuchen Sie, so schnell wie möglich zu sein, während Sie genau bleiben.<br><br>
-    Drücken Sie Enter, wenn Sie bereit sind zu starten.
+    Falls Sie einen Fehler machen, wird ein rotes <b>X</b> angezeigt. Drücken Sie die unten angegebene Taste, um fortzufahren. Versuchen Sie, so schnell wie möglich zu sein, während Sie genau bleiben.<br><br>
+    Drücken Sie <b>Enter</b>, wenn Sie bereit sind zu starten.
     </div>`,
     choices: ['Enter'],
     on_finish: function(){
@@ -979,7 +996,7 @@ var trial_block4 = {
             stimulus: jsPsych.timelineVariable('stimulus'),
             stim_key_association: jsPsych.timelineVariable('stim_key_association'),
             html_when_wrong: '<span style="color: red; font-size: 80px">X</span>',
-            bottom_instructions: '<p>Falls Sie einen Fehler machen, erscheint ein rotes X. Drücken Sie die andere Taste, um fortzufahren.</p>',
+            bottom_instructions: '<p>Falls Sie einen Fehler machen, erscheint ein rotes <b>X</b>. Drücken Sie die andere Taste, um fortzufahren.</p>',
             force_correct_key_press: true,
             display_feedback: true,
             trial_duration: 3000,
@@ -988,7 +1005,7 @@ var trial_block4 = {
             left_category_label: ['Schlecht', 'Arabisch-muslimische Namen'],
             right_category_label: ['Gut', 'Weiße europäische Namen'],
             response_ends_trial: true,
-            data: { iat_type: 'schlecht-Arabisch' }
+            data: { iat_type: 'bad-Arabic Muslims' }
         }
     ],
     timeline_variables: [
@@ -1012,22 +1029,22 @@ var trial_block4 = {
         { type: jsPsychIatHtml, stimulus: "Kazuki", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Chaiyo", stim_key_association: "right" },
         { type: jsPsychIatHtml, stimulus: "Marcelo", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Hurtful", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Hatred", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Horrible", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Dirty", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Failure", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Angry", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Pain", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Ugly", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Fabulous", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Excitement", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Glorious", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Cheerful", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Cherish", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Enjoy", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Delightful", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Joyous", stim_key_association: "right" }
+        { type: jsPsychIatHtml, stimulus: "Schmerz", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Verletzend", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Hass", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Schmutzig", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Misserfolg", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Wütend", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Schrecklich", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Hässlich", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Triumph", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Freundschaft", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Fröhlich", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Lachen", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Freude", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Glücklich", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Freudig", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Freund", stim_key_association: "right" }
     ],
     randomize_order: true,
     repetitions: 2,
@@ -1040,12 +1057,11 @@ var trial_block4 = {
 var instructions_block5 = {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: `<div class="instructions">
-    Instruktion Block 5<br><br>
-    Achtung, die Zuordnungen haben sich geändert!<br><br>
+    <b>Achtung, die Zuordnungen haben sich geändert!</b><br><br>
     Verwenden Sie die Taste <strong>E</strong> für <strong>Weiße europäische Namen</strong>.<br><br>
     Verwenden Sie die Taste <strong>I</strong> für <strong>Arabisch-muslimische Namen</strong>.<br><br>
-    Falls Sie einen Fehler machen, wird ein rotes X angezeigt. Drücken Sie die unten angegebene Taste, um fortzufahren. Versuchen Sie, so schnell wie möglich zu sein, während Sie genau bleiben.<br><br>
-    Drücken Sie Enter, wenn Sie bereit sind zu starten.
+    Falls Sie einen Fehler machen, wird ein rotes <b>X</b> angezeigt. Drücken Sie die unten angegebene Taste, um fortzufahren. Versuchen Sie, so schnell wie möglich zu sein, während Sie genau bleiben.<br><br>
+    Drücken Sie <b>Enter</b>, wenn Sie bereit sind zu starten.
     </div>`,
     choices: ['Enter'],
     on_finish: function(){
@@ -1062,7 +1078,7 @@ var trial_block5 = {
             stimulus: jsPsych.timelineVariable('stimulus'),
             stim_key_association: jsPsych.timelineVariable('stim_key_association'),
             html_when_wrong: '<span style="color: red; font-size: 80px">X</span>',
-            bottom_instructions: '<p>Falls Sie einen Fehler machen, erscheint ein rotes X. Drücken Sie die andere Taste, um fortzufahren.</p>',
+            bottom_instructions: '<p>Falls Sie einen Fehler machen, erscheint ein rotes <b>X</b>. Drücken Sie die andere Taste, um fortzufahren.</p>',
             force_correct_key_press: true,
             display_feedback: true,
             trial_duration: 3000,
@@ -1107,11 +1123,10 @@ var trial_block5 = {
 var instructions_block6 = {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: `<div class="instructions">
-    Instruktion Block 6<br><br>
     Verwenden Sie die Taste <strong>E</strong> für <strong>Schlecht</strong> und für <strong>weiße europäische Namen</strong>.<br><br>
     Verwenden Sie die Taste <strong>I</strong> für <strong>Gut</strong> und für <strong>Arabisch-muslimische Namen</strong>.<br><br>
-    Falls Sie einen Fehler machen, wird ein rotes X angezeigt. Drücken Sie die unten angegebenen Tasten, um fortzufahren. Versuchen Sie, so schnell wie möglich zu sein, während Sie genau bleiben.<br><br>
-    Drücken Sie Enter, wenn Sie bereit sind zu starten.
+    Falls Sie einen Fehler machen, wird ein rotes <b>X</b> angezeigt. Drücken Sie die unten angegebenen Tasten, um fortzufahren. Versuchen Sie, so schnell wie möglich zu sein, während Sie genau bleiben.<br><br>
+    Drücken Sie <b>Enter</b>, wenn Sie bereit sind zu starten.
     </div>`,
     choices: ['Enter'],
     on_finish: function(){
@@ -1128,7 +1143,7 @@ var trial_block6 = {
             stimulus: jsPsych.timelineVariable('stimulus'),
             stim_key_association: jsPsych.timelineVariable('stim_key_association'),
             html_when_wrong: '<span style="color: red; font-size: 80px">X</span>',
-            bottom_instructions: '<p>Falls Sie einen Fehler machen, erscheint ein rotes X. Drücken Sie die andere Taste, um fortzufahren.</p>',
+            bottom_instructions: '<p>Falls Sie einen Fehler machen, erscheint ein rotes <b>X</b>. Drücken Sie die andere Taste, um fortzufahren.</p>',
             force_correct_key_press: true,
             display_feedback: true,
             trial_duration: 3000,
@@ -1165,22 +1180,22 @@ var trial_block6 = {
         { type: jsPsychIatHtml, stimulus: "Kazuki", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Chaiyo", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Marcelo", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Hurtful", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Hatred", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Horrible", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Dirty", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Failure", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Angry", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Pain", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Ugly", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Fabulous", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Excitement", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Glorious", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Cheerful", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Cherish", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Enjoy", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Delightful", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Joyous", stim_key_association: "right" }
+        { type: jsPsychIatHtml, stimulus: "Schmerz", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Verletzend", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Hass", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Schmutzig", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Misserfolg", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Wütend", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Schrecklich", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Hässlich", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Triumph", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Freundschaft", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Fröhlich", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Lachen", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Freude", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Glücklich", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Freudig", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Freund", stim_key_association: "right" }
     ],
     randomize_order: true,
     repetitions: 1,
@@ -1193,13 +1208,12 @@ var trial_block6 = {
 var instructions_block7 = {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: `<div class="instructions">
-    Instruktion Block 7<br><br>
-    Dies ist die gleiche Tastenzuweisung wie im vorherigen Abschnitt.<br><br>
+    <b>Dies ist die gleiche Tastenzuweisung wie im vorherigen Abschnitt.</b><br><br>
     Verwenden Sie die Taste <strong>E</strong> für <strong>Schlecht</strong> und für <strong>weiße europäische Namen</strong>.<br><br>
     Verwenden Sie die Taste <strong>I</strong> für <strong>Gut</strong> und für <strong>Arabisch-muslimische Namen</strong>.<br><br>
     Jeder Begriff gehört nur zu einer Kategorie.<br><br>
-    Falls Sie einen Fehler machen, wird ein rotes X angezeigt. Drücken Sie die unten angegebene Taste, um fortzufahren. Versuchen Sie, so schnell wie möglich zu sein, während Sie genau bleiben.<br><br>
-    Drücken Sie Enter, wenn Sie bereit sind zu starten.
+    Falls Sie einen Fehler machen, wird ein rotes <b>X</b> angezeigt. Drücken Sie die unten angegebene Taste, um fortzufahren. Versuchen Sie, so schnell wie möglich zu sein, während Sie genau bleiben.<br><br>
+    Drücken Sie <b>Enter</b>, wenn Sie bereit sind zu starten.
     </div>`,
     choices: ['Enter'],
     on_finish: function(){
@@ -1216,7 +1230,7 @@ var trial_block7 = {
             stimulus: jsPsych.timelineVariable('stimulus'),
             stim_key_association: jsPsych.timelineVariable('stim_key_association'),
             html_when_wrong: '<span style="color: red; font-size: 80px">X</span>',
-            bottom_instructions: '<p>Falls Sie einen Fehler machen, erscheint ein rotes X. Drücken Sie die andere Taste, um fortzufahren.</p>',
+            bottom_instructions: '<p>Falls Sie einen Fehler machen, erscheint ein rotes <b>X</b>. Drücken Sie die andere Taste, um fortzufahren.</p>',
             force_correct_key_press: true,
             display_feedback: true,
             trial_duration: 3000,
@@ -1225,7 +1239,7 @@ var trial_block7 = {
             left_category_label: ['Schlecht', 'weiße europäische Namen'],
             right_category_label: ['Gut', 'Arabisch-muslimische Namen'],
             response_ends_trial: true,
-            data: { iat_type: 'schlecht-weiß' }
+            data: { iat_type: 'bad-White European' }
         }
     ],
     timeline_variables: [
@@ -1249,22 +1263,22 @@ var trial_block7 = {
         { type: jsPsychIatHtml, stimulus: "Kazuki", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Chaiyo", stim_key_association: "left" },
         { type: jsPsychIatHtml, stimulus: "Marcelo", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Hurtful", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Hatred", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Horrible", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Dirty", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Failure", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Angry", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Pain", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Ugly", stim_key_association: "left" },
-        { type: jsPsychIatHtml, stimulus: "Fabulous", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Excitement", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Glorious", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Cheerful", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Cherish", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Enjoy", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Delightful", stim_key_association: "right" },
-        { type: jsPsychIatHtml, stimulus: "Joyous", stim_key_association: "right" }
+        { type: jsPsychIatHtml, stimulus: "Schmerz", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Verletzend", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Hass", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Schmutzig", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Misserfolg", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Wütend", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Schrecklich", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Hässlich", stim_key_association: "left" },
+        { type: jsPsychIatHtml, stimulus: "Triumph", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Freundschaft", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Fröhlich", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Lachen", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Freude", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Glücklich", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Freudig", stim_key_association: "right" },
+        { type: jsPsychIatHtml, stimulus: "Freund", stim_key_association: "right" }
     ],
     randomize_order: true,
     repetitions: 2,
@@ -1276,8 +1290,8 @@ var trial_block7 = {
 // Gesamttimeline des IAT
 var IAT_trial = {
     timeline: [
-        category_block,
         instructions_iat,
+        category_block,
         instructions_block,
         trial_block,
         instructions_block2,
@@ -1389,43 +1403,60 @@ Ihre Angaben werden anonym erfasst und sind nicht auf Ihre Person zurückführba
         <p>Vielen Dank für Ihre Teilnahme an unserer Studie!</p>
   
         <p>
-          Diese Studie untersucht, wie bestimmte kontextuelle Informationen zusammen 
-          mit dem äußeren Erscheinungsbild das Wiedererkennen von Gesichtern beeinflussen. 
-          Die ausgewählten Berufsgruppen und Straftaten in der Studie werden dabei als 
-          stereotypisch oder nicht stereotypisch für unterschiedliche Personengruppen 
-          wahrgenommen, denen eine bestimmte ethnische Zugehörigkeit zugewiesen wird.
+          Diese Studie untersucht, wie kriminelle (Verbrechen) und nicht kriminelle (Berufe)
+            Verhaltensbeschreibungen zusammen mit dem äußeren Erscheinungsbild einer Person das
+            Wiedererkennen und Zuordnen deren Gesichter beeinflussen. Dabei überprüfen wir,
+            inwieweit stereotypische Annahmen über bestimmte Personengruppen die Gedächtnisleistung
+            von Personen beeinflussen und möglicherweise zu Verzerrungen führen.
         </p>
         
         <p>
-          Die Stereotypen wurden durch eine vorangegangene Pilotstudie ermittelt, bei 
-          der Personen angeben sollten, was im Durchschnitt eine weiße Person in Deutschland 
-          als stereotypisch für Personen mit einem bestimmten äußeren Erscheinungsbild 
-          betrachtet. Die Paarungen zwischen Bildern, Berufsgruppen und Straftaten 
-          spiegeln somit nur diese Annahmen wider und <b>stellen keine tatsächlichen 
-          Zusammenhänge</b> dar.
+          In einer vorherigen Pilotstudie wurde hierfür untersucht, welche Berufe und Verbrechen von
+            einer weißen deutschen Person als stereotypisch für verschiedene Personen wahrgenommen
+            werden, die aufgrund ihres äußeren Erscheinungsbildes zu bestimmten ethnischen Gruppen
+            zugeordnet werden. <br>
+            Die Darbietung der Gesichter in Verbindung mit bestimmten Berufsgruppen und Verbrechen
+            spiegelt somit nur die stereotypischen Annahmen aus der Pilotstudie wider und stellt <b>keine
+            tatsächlichen Zusammenhänge</b> dar. 
         </p>
         
         <p>
-          Bitte beachten Sie jedoch, dass die verwendeten Stereotype rassistische 
-          Vorurteile und Narrative widerspiegeln können, die in dieser Studie untersucht 
-          werden.
+          Bitte beachten Sie, dass die verwendeten Stereotype rassistische Vorurteile und Narrative
+            widerspiegeln können, die in dieser Studie untersucht werden. 
         </p>
         
         <p>
-          Die Erforschung solcher Stereotype ist von Bedeutung, da sie das Gedächtnis 
-          von Zeug*innen beeinflussen können, was in polizeilichen Ermittlungen 
-          zu falschen Aussagen und potenziell zu Fehlurteilen führen kann, 
-          besonders für People of Colour.
+          Die Erforschung solcher Stereotype ist besonders wichtig, da sie das Gedächtnis von
+            Augenzeug*innen einer Straftat beeinflussen können und somit zu falschen Aussagen und
+            Fehlurteilen vor Gericht führen können.
         </p>
         
         <p>
-          Unser Ziel ist es daher zu untersuchen, wie diese Stereotype das Gedächtnis 
-          von Zeug*innen beeinflussen und somit Falschaussagen besser vorbeugen und 
-          reduzieren zu können. Ihre Teilnahme ist daher ein wichtiger Beitrag 
-          zu dieser Forschung. Wir danken Ihnen herzlich für Ihre Unterstützung.
+          Unser Ziel ist es daher genauer zu untersuchen, wie das Erscheinungsbild einer Person und
+            stereotypische Annahmen zu deren Verhalten das Gedächtnis von Augenzeug*innen
+            beeinflussen, um somit Fehlverurteilungen von unschuldigen Personen besser vorbeugen und
+            zu können. 
         </p>
-  
-        <p><strong>Falls Sie Anmerkungen zur Studie haben, können Sie diese gerne im folgenden Feld angeben:</strong></p>
+
+        <p>
+            Ihre Teilnahme ist daher ein wichtiger Beitrag zu dieser Forschung. Wir danken Ihnen
+            vielmals für Ihre Unterstützung. 
+        </p>
+
+        <p>
+            Wir bitten Sie, mit Personen, die noch an dieser Studie teilnehmen möchten, <b>nicht</b> über deren
+            Inhalte zu sprechen, bis diese Personen die Studie selbst abgeschlossen haben. Vielen Dank. 
+        </p>
+
+        <p>
+        Auf der folgenden Seite können Sie auswählen, ob Sie an der Verlosung der OnlineGutscheine teilnehmen oder als Psychologiestudierende*r der Universität Heidelberg 0,75
+        Versuchspersonenstunden erhalten möchten
+        </p>
+
+        Für Rückfragen stehen wir Ihnen gerne zur Verfügung unter 
+          <a href="mailto:luca.bieling@stud.uni-heidelberg.de">luca.bieling@stud.uni-heidelberg.de</a>.
+
+        <p><strong>Falls Sie Anmerkungen zur Studie haben, können Sie diese gerne im folgenden Feld anonym angeben:</strong></p>
         <p>
           <textarea id="feedbackBox" 
           style="
@@ -1440,15 +1471,6 @@ Ihre Angaben werden anonym erfasst und sind nicht auf Ihre Person zurückführba
 
         </p>
   
-        <p>
-          Auf der folgenden Seite können Sie auswählen, ob Sie an der Verlosung 
-          der Online-Gutscheine teilnehmen oder als Psychologiestudierende*r 
-          der Universität Heidelberg 0,75 Versuchspersonenstunden erhalten möchten. 
-          Für Rückfragen stehen wir Ihnen gerne zur Verfügung unter 
-          <a href="mailto:luca.bieling@stud.uni-heidelberg.de">luca.bieling@stud.uni-heidelberg.de</a>.
-        </p>
-  
-  
       </div>`
     ],
     show_clickable_nav: true,
@@ -1457,39 +1479,33 @@ Ihre Angaben werden anonym erfasst und sind nicht auf Ihre Person zurückführba
   
     // Hier werden deine IAT-Werte ausgelesen und in den Daten gespeichert
     on_start: function() {
-      let bad_Arabic_Muslims = jsPsych.data.get()
+      bad_Arabic_Muslims = jsPsych.data.get()
         .filter({ iat_type: 'bad-Arabic Muslims' })
         .filterCustom(x => x.rt < 10000);
-      let mean_bad_Arabic = bad_Arabic_Muslims.count() > 0 
+      mean_bad_Arabic = bad_Arabic_Muslims.count() > 0 
         ? bad_Arabic_Muslims.filter({ correct: true }).select('rt').mean() 
         : 0;
   
-      let bad_White_European = jsPsych.data.get()
+      bad_White_European = jsPsych.data.get()
         .filter({ iat_type: 'bad-White European' })
         .filterCustom(x => x.rt < 10000);
-      let mean_bad_White = bad_White_European.count() > 0 
+      mean_bad_White = bad_White_European.count() > 0 
         ? bad_White_European.filter({ correct: true }).select('rt').mean() 
         : 0;
   
-      let combinedData = bad_Arabic_Muslims
+      combinedData = bad_Arabic_Muslims
         .join(bad_White_European)
         .filter({ correct: true });
-      let sd = combinedData.count() > 0 
+      sd = combinedData.count() > 0 
         ? combinedData.select('rt').sd() 
         : 1;
   
-      let d = sd > 0 
+      d = sd > 0 
         ? (mean_bad_White - mean_bad_Arabic) / sd 
         : 0;
   
       // Speichern der IAT-Auswertung in den jsPsych-Daten
-      jsPsych.data.addProperties({
-        mean_correct_responses_bad_Arabic_Muslims: mean_bad_Arabic,
-        mean_correct_responses_bad_White_European: mean_bad_White,
-        sd: sd,
-        d: d,
-      });
-      console.log("IAT-Daten berechnet, d = ", d);
+ 
     },
     on_finish: function() {
         for (let i = 0; i < 4; i++) {
@@ -1517,7 +1533,7 @@ const mail_trial = {
           elements: [
             {
                 type: "text",
-                name: "mail",
+                name: "mailVerlosung",
                 inputType: "email",
                 id: "Verlosung",
                 placeholder: "E-Mail-Adresse",
@@ -1525,7 +1541,7 @@ const mail_trial = {
             },
             {
                 type: "text",
-                name: "mail",
+                name: "mailVPN",
                 inputType: "email",
                 id: "VPN",
                 placeholder: "E-Mail-Adresse",
@@ -1543,17 +1559,12 @@ const mail_trial = {
   };
 
 timeline.push(preload);
-/*
 timeline.push(instructions)
-*/
 timeline.push(codeErstellen);
-/*
 timeline.push(einverstaendniserklaerung);
 timeline.push(instructions_1);
 timeline.push(instruktionenVerstanden);
-*/
 timeline.push(instructions1_2);
-/*
 timeline.push(preload2);
 timeline.push(extinction_phase);
 timeline.push(instructions_2);
@@ -1561,10 +1572,7 @@ timeline.push(test_procedure);
 timeline.push(instructions_3);
 timeline.push(preload3);
 timeline.push(test_phase);
-*/
 timeline.push(IAT_trial);
-/*
 timeline.push(survey_trial);
 timeline.push(debrief);
 timeline.push(mail_trial);
-*/
