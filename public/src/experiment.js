@@ -315,10 +315,6 @@ var codeErstellen = {
         Um an der Studie teilzunehmen, bitten wir Sie, einen vierstelligen Code zu erstellen,
         basierend auf den nachfolgend gestellten Fragen. Dieser Code dient der Anonymisierung Ihrer 
         Daten. <br> <br>
-        Mit Hilfe dieses Codes können wir Psychologiestudierenden der Universität Heidelberg Ihre 
-        Versuchspersonenstunden zukommen lassen, ohne dass Ihre Daten mit Ihrer Person in
-        Verbindung gebracht werden können. <b> Bitte notieren Sie sich diesen Code schriftlich für 
-        später! </b> <br><br>
         1. Wie lautet die erste Ziffer Ihres Geburtsdatums ? <br>
             2. Wie lautet der erste Buchstabe des Vornamens Ihrer Mutter ? <br>
             3. Wie lautet der dritte Buchstabe Ihres Geburtsorts ? <br>
