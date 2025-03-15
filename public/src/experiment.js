@@ -313,8 +313,7 @@ var codeErstellen = {
     preamble:
       `<div class="instructions"><h3> <b>Teilnahmevoraussetzungen</b> </h3>  
         Um an der Studie teilzunehmen, bitten wir Sie, einen vierstelligen Code zu erstellen,
-        basierend auf den nachfolgend gestellten Fragen. Dieser Code dient der Anonymisierung Ihrer 
-        Daten. <br> <br>
+        basierend auf den nachfolgend gestellten Fragen. <br> <br>
         1. Wie lautet die erste Ziffer Ihres Geburtsdatums ? <br>
             2. Wie lautet der erste Buchstabe des Vornamens Ihrer Mutter ? <br>
             3. Wie lautet der dritte Buchstabe Ihres Geburtsorts ? <br>
